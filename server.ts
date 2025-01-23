@@ -9,6 +9,10 @@ import authRouter from "./routes/auth.route";
 import categoryRouter from "./routes/category.route";
 import multer from "fastify-multer";
 import fileRouter from "./routes/file.route";
+import brandRouter from "./routes/brand.route";
+import ProductColorRouter from "./routes/product-color.route";
+import ProductSize from "./models/product-size.model";
+import ProductSizeRouter from "./routes/product-size.route";
 
 const fastify = Fastify();
 
@@ -72,17 +76,10 @@ fastify.addSchema({
 // routes
 fastify.register(authRouter, { prefix: "/auth" });
 fastify.register(categoryRouter, { prefix: "/category" });
+fastify.register(brandRouter, { prefix: "/brand" });
 fastify.register(fileRouter, { prefix: "/file" });
-
-// fastify.route({
-//   url: "/file",
-//   method: "POST",
-//   preHandler: upload.single("file"),
-//   handler: function (request, reply) {
-//     console.log(request);
-//     reply.send(request.file);
-//   },
-// });
+fastify.register(ProductColorRouter, { prefix: "/color" });
+fastify.register(ProductSizeRouter, { prefix: "/size" });
 
 // start the server
 

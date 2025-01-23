@@ -20,7 +20,7 @@ interface ChangePasswordRequest {
 
 interface ProductParents {
   name: string;
-  image: string;
+  image?: string;
 }
 
 interface FileUpload {
@@ -30,4 +30,9 @@ interface FileUpload {
   mimetype: string;
   size: number;
   buffer: Buffer;
+}
+
+interface ProductVariants {
+  _id: string;
+  value: string;
 }

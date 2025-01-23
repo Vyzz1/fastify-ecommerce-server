@@ -1,9 +1,13 @@
 import { FastifyPluginAsync } from "fastify";
-import brandController from "../controller/brand.controller";
 import { brandSchema } from "../schemas";
+import ProductParentsController from "../controller/product-parent.controller";
+import Brand from "../models/brand.model";
 
 const brandRouter: FastifyPluginAsync = async (fastify) => {
   // GET /brands - Get all brands
+
+  const controller = new ProductParentsController(Brand);
+
   fastify.get(
     "/",
     {
@@ -22,17 +26,17 @@ const brandRouter: FastifyPluginAsync = async (fastify) => {
         },
       },
     },
-    brandController.handleGetBrands
+    controller.handleGetAll
   );
 
   // POST /brands - Create a new brand
-  fastify.post<{ Body: { name: string } }>(
+  fastify.post<{ Body: ProductParents }>(
     "/",
     {
       schema: {
         body: {
           type: "object",
-          required: ["name", "image"],
+          required: ["name"],
           properties: brandSchema,
         },
         response: {
@@ -46,13 +50,13 @@ const brandRouter: FastifyPluginAsync = async (fastify) => {
         },
       },
     },
-    brandController.handleCreateBrand
+    controller.handleCreate
   );
 
   // PUT /brands/:id - Update an existing brand
   fastify.put<{
     Params: { id: string };
-    Body: { name: string };
+    Body: ProductParents;
   }>(
     "/:id",
     {
@@ -66,7 +70,7 @@ const brandRouter: FastifyPluginAsync = async (fastify) => {
         },
         body: {
           type: "object",
-          required: ["name", "image"],
+          required: ["name"],
           properties: brandSchema,
         },
         response: {
@@ -80,7 +84,7 @@ const brandRouter: FastifyPluginAsync = async (fastify) => {
         },
       },
     },
-    brandController.handleUpdateBrand
+    controller.handleUpdate
   );
 
   // DELETE /brands/:id - Delete a brand
@@ -108,7 +112,7 @@ const brandRouter: FastifyPluginAsync = async (fastify) => {
         },
       },
     },
-    brandController.handleDeleteBrand
+    controller.handleDelete
   );
 
   // GET /brands/:id - Get a brand by ID
@@ -134,7 +138,7 @@ const brandRouter: FastifyPluginAsync = async (fastify) => {
         },
       },
     },
-    brandController.handleGetBrandById
+    controller.handleGetById
   );
 };
 

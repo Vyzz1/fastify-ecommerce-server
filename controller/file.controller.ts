@@ -3,7 +3,6 @@ import multer from "fastify-multer";
 import s3Client from "../utils/s3Client";
 import { Multipart, MultipartFile } from "@fastify/multipart";
 
-// Multer storage (use memory or disk storage as needed)
 const storage = multer.memoryStorage();
 const myMulter = multer({ storage });
 

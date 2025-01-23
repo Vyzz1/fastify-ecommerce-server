@@ -103,15 +103,13 @@ const refreshController: RouteHandler = async (request, reply) => {
     return ErrorResponse.sendError(reply, "Unauthorized", 401);
   }
 
-  const newToken = jwt.sign(
-    { email: user!.email },
-    process.env.REFRESH_TOKEN!,
-    {
-      expiresIn: "10s",
-    }
+  const accessToken = jwt.sign(
+    { email: user.email, role: "user" },
+    process.env.ACCESS_TOKEN!,
+    { expiresIn: "15m" }
   );
 
-  reply.send({ accessToken: newToken });
+  reply.send({ accessToken });
 };
 
 const logoutController: RouteHandler = async (request, reply) => {

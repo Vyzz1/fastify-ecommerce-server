@@ -1,11 +1,17 @@
 import { FastifyPluginAsync } from "fastify";
-import validateJwt from "../hooks/validateJwt";
-import validateRole from "../hooks/validateRole";
-import categoryController from "../controller/category.controller";
-import { categorySchema } from "../schemas";
-import auth from "../utils/auth";
+
+import {
+  categorySchema,
+  commonResponseSchema,
+  requiredIdParam,
+} from "../schemas";
+import ProductParentsController from "../controller/product-parent.controller";
+import Category from "../models/category.model";
+// import auth from "../utils/auth";
 
 const categoryRoute: FastifyPluginAsync = async (fastify) => {
+  const controller = new ProductParentsController(Category);
+
   fastify.get(
     "/",
     {
@@ -21,7 +27,7 @@ const categoryRoute: FastifyPluginAsync = async (fastify) => {
         },
       },
     },
-    categoryController.handleGetCategories
+    controller.handleGetAll
   );
 
   fastify.post<{ Body: ProductParents }>(
@@ -42,20 +48,20 @@ const categoryRoute: FastifyPluginAsync = async (fastify) => {
         },
       },
     },
-    categoryController.handleCreateCategory
+    controller.handleCreate
   );
 
+  const a = {
+    ...commonResponseSchema(categorySchema),
+  };
+  console.log(a);
   fastify.put<{ Params: { id: string }; Body: ProductParents }>(
     "/:id",
     {
+      // ...auth.requiredRole(fastify, "admin"),
+
       schema: {
-        params: {
-          type: "object",
-          properties: {
-            id: { type: "string" },
-          },
-          required: ["id"],
-        },
+        ...requiredIdParam,
         body: {
           type: "object",
           properties: {
@@ -64,23 +70,17 @@ const categoryRoute: FastifyPluginAsync = async (fastify) => {
           },
           required: ["name", "image"],
         },
-        response: {
-          200: {
-            type: "object",
-            properties: categorySchema,
-          },
-          "4xx": {
-            $ref: "ErrorResponse#",
-          },
-        },
+
+        ...commonResponseSchema(categorySchema),
       },
     },
-    categoryController.handleUpdateCategory
+    controller.handleUpdate
   );
 
   fastify.delete<{ Params: { id: string } }>(
     "/:id",
     {
+      // ...auth.requiredRole(fastify, "admin"),
       schema: {
         params: {
           type: "object",
@@ -89,22 +89,17 @@ const categoryRoute: FastifyPluginAsync = async (fastify) => {
           },
           required: ["id"],
         },
-        response: {
-          200: {
-            type: "object",
-            properties: {
-              message: { type: "string" },
-            },
-          },
-        },
+
+        ...commonResponseSchema(categorySchema, 204),
       },
     },
-    categoryController.handleDeleteCategory
+    controller.handleDelete
   );
 
   fastify.get<{ Params: { id: string } }>(
     "/:id",
     {
+      // ...auth.requiredRole(fastify, "admin"),
       schema: {
         params: {
           type: "object",
@@ -113,15 +108,11 @@ const categoryRoute: FastifyPluginAsync = async (fastify) => {
           },
           required: ["id"],
         },
-        response: {
-          200: {
-            type: "object",
-            properties: categorySchema,
-          },
-        },
+
+        ...commonResponseSchema(categorySchema),
       },
     },
-    categoryController.handleGetCategoryById
+    controller.handleGetById
   );
 };
 

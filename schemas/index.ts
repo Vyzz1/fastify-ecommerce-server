@@ -23,3 +23,36 @@ export const brandSchema = {
   _id: { type: "string" },
   name: { type: "string" },
 };
+
+export const productVariantSchema = {
+  _id: { type: "string" },
+  value: { type: "string" },
+};
+
+export const errorResponse = {
+  "4xx": { $ref: "ErrorResponse#" },
+};
+
+export const commonResponseSchema = (
+  properties: Record<string, any>,
+  status = 200
+) => ({
+  response: {
+    [status]: {
+      type: "object",
+      properties,
+    },
+    ...errorResponse,
+  },
+});
+
+export const requiredIdParam = {
+  params: {
+    type: "object",
+    properties: {
+      id: { type: "string" },
+      type: { type: "string" },
+    },
+    required: ["id"],
+  },
+};
