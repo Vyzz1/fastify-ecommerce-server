@@ -9,11 +9,18 @@ class ProductParentsController<T extends Document> {
   constructor(private readonly model: Model<T>) {}
   public checkDuplicateProductVariantName = async (
     name: string,
+    type: "create" | "update",
     excludeId?: string
   ) => {
-    const duplicate = await this.model.findOne({ name }).exec();
+    const duplicate = await this.model
+      .findOne({
+        name: name,
+      })
+      .exec();
 
-    if (duplicate && duplicate._id.toString() !== excludeId) {
+    if (duplicate && type === "create") {
+      return true;
+    } else if (duplicate && duplicate._id.toString() !== excludeId) {
       return true;
     }
     return false;
@@ -38,7 +45,8 @@ class ProductParentsController<T extends Document> {
     reply
   ) => {
     const isDuplicate = await this.checkDuplicateProductVariantName(
-      request.body.name
+      request.body.name,
+      "create"
     );
 
     if (isDuplicate) {
@@ -69,7 +77,11 @@ class ProductParentsController<T extends Document> {
     const { id } = request.params;
     const { name } = request.body;
 
-    const isDuplicate = await this.checkDuplicateProductVariantName(name, id);
+    const isDuplicate = await this.checkDuplicateProductVariantName(
+      name,
+      "update",
+      id
+    );
 
     if (isDuplicate) {
       return ErrorResponse.sendError(

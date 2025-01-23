@@ -14,7 +14,7 @@ class ProductVariantController<T extends Document> {
   ) => {
     const duplicate = await this.model
       .findOne({
-        value,
+        value: value,
       })
       .exec();
 
