@@ -15,6 +15,18 @@ const authRouter: FastifyPluginAsync = async (fastify) => {
       },
       response: {
         "4xx": { $ref: "ErrorResponse#" },
+        200: {
+          type: "object",
+          properties: {
+            _id: { type: "string" },
+            email: { type: "string" },
+            name: { type: "string" },
+            role: { type: "string" },
+            dob: { type: "string" },
+            photoUrl: { type: "string" },
+            token: { type: "string" },
+          },
+        },
       },
     },
   });

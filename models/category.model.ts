@@ -5,6 +5,10 @@ const categorySchema = new Schema({
     type: String,
     required: true,
   },
+  image: {
+    type: String,
+    required: true,
+  },
 });
 
 const Category = models?.Brand || model("Category", categorySchema);

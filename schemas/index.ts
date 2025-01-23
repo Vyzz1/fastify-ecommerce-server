@@ -12,3 +12,14 @@ export const userSchema = {
   role: { type: "string" },
   dob: { type: "string" },
 };
+
+export const categorySchema = {
+  _id: { type: "string" },
+  name: { type: "string" },
+  image: { type: "string" },
+};
+
+export const brandSchema = {
+  _id: { type: "string" },
+  name: { type: "string" },
+};

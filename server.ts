@@ -6,12 +6,16 @@ import cors from "./config/cors";
 import { errorResponseSchema, userSchema } from "./schemas";
 import connectToDB from "./utils/connect";
 import authRouter from "./routes/auth.route";
+import categoryRouter from "./routes/category.route";
+import multer from "fastify-multer";
+import fileRouter from "./routes/file.route";
 
 const fastify = Fastify();
 
 const PORT = 8000;
 
 dotenv.config();
+
 declare module "fastify" {
   interface FastifyRequest {
     user: JwtPayload | null;
@@ -30,10 +34,21 @@ fastify.register(cookie, {
     path: "/",
   },
 });
+
+// register plugins
 fastify.register(import("@fastify/auth"));
 
 fastify.register(cors);
 
+// register multer
+fastify.register(multer.contentParser);
+
+// for parsing multipart/form-data
+fastify.addContentTypeParser("multipart/form-data", (_, payload, done) => {
+  done(null, payload);
+});
+
+// global schemas
 fastify.addSchema({
   $id: "ErrorResponse",
   type: "object",
@@ -54,7 +69,22 @@ fastify.addSchema({
   },
 });
 
+// routes
 fastify.register(authRouter, { prefix: "/auth" });
+fastify.register(categoryRouter, { prefix: "/category" });
+fastify.register(fileRouter, { prefix: "/file" });
+
+// fastify.route({
+//   url: "/file",
+//   method: "POST",
+//   preHandler: upload.single("file"),
+//   handler: function (request, reply) {
+//     console.log(request);
+//     reply.send(request.file);
+//   },
+// });
+
+// start the server
 
 fastify.listen({ port: PORT }, async (err, address) => {
   await connectToDB();

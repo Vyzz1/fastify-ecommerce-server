@@ -4,7 +4,6 @@ import jwt from "jsonwebtoken";
 
 import bcrypt from "bcrypt";
 import User from "../models/user.model";
-import { request } from "http";
 interface LoginRequest {
   email: string;
   password: string;
@@ -41,6 +40,13 @@ const loginController: RouteHandler<{ Body: LoginRequest }> = async (
 
   await User.updateOne({ email: user.email }, { refreshToken });
 
+  //send response
+  const response = {
+    ...user.toJSON(),
+    token: accessToken,
+    name: user.firstName + " " + user.lastName,
+  };
+
   reply
     .cookie("refreshToken", refreshToken, {
       httpOnly: true,
@@ -48,7 +54,7 @@ const loginController: RouteHandler<{ Body: LoginRequest }> = async (
       sameSite: "lax",
       path: "/",
     })
-    .send({ accessToken });
+    .send(response);
 };
 
 const registerController: RouteHandler<{ Body: User }> = async (
@@ -153,6 +159,27 @@ const getUserInformation: RouteHandler = async (request, reply) => {
   return reply.send(user);
 };
 
+const updateUserInformation: RouteHandler<{ Body: User }> = async (
+  request,
+  reply
+) => {
+  const email = request.user?.email;
+
+  if (!email) {
+    return ErrorResponse.sendError(reply, "Unauthorized", 401);
+  }
+
+  const user = await User.findOneAndUpdate({ email }, request.body, {
+    new: true,
+  }).exec();
+
+  if (!user) {
+    return ErrorResponse.sendError(reply, "User not found", 400);
+  }
+
+  return reply.send(user);
+};
+
 const updateAvatar: RouteHandler<{ Body: { avatar: string } }> = async (
   request,
   reply
@@ -221,4 +248,5 @@ export default {
   getUserInformation,
   updateAvatar,
   updatePassword,
+  updateUserInformation,
 };

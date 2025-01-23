@@ -34,6 +34,11 @@ const userSchema = new Schema({
     type: String,
     required: false,
   },
+  gender: {
+    type: String,
+    enum: ["Male", "Female", "Other"],
+    required: true,
+  },
 });
 
 const User = models?.User || model("User", userSchema);
