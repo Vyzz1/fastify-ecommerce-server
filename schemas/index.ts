@@ -56,3 +56,14 @@ export const requiredIdParam = {
     required: ["id"],
   },
 };
+
+export const addressSchema = {
+  _id: { type: "string" },
+  fullName: { type: "string" },
+  phoneNumber: { type: "string" },
+  isDefault: { type: "boolean" },
+  province: { type: "string" },
+  district: { type: "string" },
+  ward: { type: "string" },
+  specify: { type: "string" },
+};

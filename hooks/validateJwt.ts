@@ -16,6 +16,7 @@ const validateJwt: preHandlerHookHandler = async (request, reply, done) => {
     request.user = {
       email: (decoded as JwtPayload).email,
       role: (decoded as JwtPayload).role,
+      id: (decoded as JwtPayload).id,
     };
   });
   done();

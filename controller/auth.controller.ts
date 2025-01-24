@@ -8,6 +8,7 @@ interface LoginRequest {
   email: string;
   password: string;
 }
+
 const loginController: RouteHandler<{ Body: LoginRequest }> = async (
   request,
   reply
@@ -27,7 +28,7 @@ const loginController: RouteHandler<{ Body: LoginRequest }> = async (
   }
 
   const accessToken = jwt.sign(
-    { email: user.email, role: "user" },
+    { email: user.email, role: user.role, id: user._id },
     process.env.ACCESS_TOKEN!,
     { expiresIn: "15m" }
   );
@@ -40,7 +41,6 @@ const loginController: RouteHandler<{ Body: LoginRequest }> = async (
 
   await User.updateOne({ email: user.email }, { refreshToken });
 
-  //send response
   const response = {
     ...user.toJSON(),
     token: accessToken,
@@ -104,7 +104,8 @@ const refreshController: RouteHandler = async (request, reply) => {
   }
 
   const accessToken = jwt.sign(
-    { email: user.email, role: "user" },
+    { email: user.email, role: "user", id: user._id },
+
     process.env.ACCESS_TOKEN!,
     { expiresIn: "15m" }
   );

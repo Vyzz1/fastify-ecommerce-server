@@ -35,6 +35,10 @@ const addressSchema = new Schema({
     ref: "User",
     required: true,
   },
+  specify: {
+    type: String,
+    required: true,
+  },
 });
 
 const Address = models?.Address || model("Address", addressSchema);

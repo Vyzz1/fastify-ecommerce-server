@@ -13,6 +13,7 @@ import brandRouter from "./routes/brand.route";
 import ProductColorRouter from "./routes/product-color.route";
 import ProductSize from "./models/product-size.model";
 import ProductSizeRouter from "./routes/product-size.route";
+import addressRouter from "./routes/address.route";
 
 const fastify = Fastify();
 
@@ -22,7 +23,7 @@ dotenv.config();
 
 declare module "fastify" {
   interface FastifyRequest {
-    user: JwtPayload | null;
+    user: UserJWTPayload | null;
   }
 }
 
@@ -80,6 +81,7 @@ fastify.register(brandRouter, { prefix: "/brand" });
 fastify.register(fileRouter, { prefix: "/file" });
 fastify.register(ProductColorRouter, { prefix: "/color" });
 fastify.register(ProductSizeRouter, { prefix: "/size" });
+fastify.register(addressRouter, { prefix: "/address" });
 
 // start the server
 

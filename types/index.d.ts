@@ -36,3 +36,30 @@ interface ProductVariants {
   _id: string;
   value: string;
 }
+
+interface UserJWTPayload {
+  email: string;
+  role: string;
+  id: string;
+}
+
+interface AddressRequest {
+  province: string;
+  district: string;
+  ward: string;
+  specify: string;
+  fullName: string;
+  phoneNumber: string;
+}
+
+interface OrderRequest {
+  address: AddressRequest;
+  total: number;
+  shippingFee: number;
+  orderDetails: OrderDetailsRequest[];
+}
+
+interface OrderDetailsRequest {
+  productItemId: string;
+  quantity: number;
+}

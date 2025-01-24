@@ -1,4 +1,5 @@
 import { model, models, Schema } from "mongoose";
+import { spec } from "node:test/reporters";
 
 const orderSchema = new Schema({
   createdAt: {
@@ -24,6 +25,18 @@ const orderSchema = new Schema({
   address: {
     type: String,
     required: true,
+  },
+  fullName: {
+    type: String,
+    required: true,
+  },
+  phoneNumber: {
+    type: String,
+    required: true,
+  },
+  specify: {
+    type: String,
+    required: false,
   },
   total: {
     type: Number,

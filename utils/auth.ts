@@ -13,8 +13,6 @@ const requiredAuth = (fastify: FastifyInstance) => ({
 });
 
 const authRequiredHook = (fastify: FastifyInstance) => {
-  console.log("authRequiredHook");
-
   return fastify.addHook(
     "onRequest",
     fastify.auth([validateJwt], { relation: "and" })
