@@ -14,6 +14,8 @@ import ProductColorRouter from "./routes/product-color.route";
 import ProductSize from "./models/product-size.model";
 import ProductSizeRouter from "./routes/product-size.route";
 import addressRouter from "./routes/address.route";
+import productItemRouter from "./routes/product-item.route";
+import shoppingCartRouter from "./routes/shopping-cart.route";
 
 const fastify = Fastify();
 
@@ -82,6 +84,8 @@ fastify.register(fileRouter, { prefix: "/file" });
 fastify.register(ProductColorRouter, { prefix: "/color" });
 fastify.register(ProductSizeRouter, { prefix: "/size" });
 fastify.register(addressRouter, { prefix: "/address" });
+fastify.register(productItemRouter, { prefix: "/product-item" });
+fastify.register(shoppingCartRouter, { prefix: "/cart" });
 
 // start the server
 

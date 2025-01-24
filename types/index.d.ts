@@ -63,3 +63,14 @@ interface OrderDetailsRequest {
   productItemId: string;
   quantity: number;
 }
+
+interface ProductItemRequest {
+  _id: string;
+  quantity: number;
+  productSizeId: string;
+}
+
+interface CartRequest {
+  productItemId: string;
+  quantity: number;
+}

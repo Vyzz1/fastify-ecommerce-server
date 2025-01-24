@@ -1,6 +1,6 @@
 import { FastifyPluginAsync } from "fastify";
 import auth from "../utils/auth";
-import fileController from "../controller/file.controller";
+import fileController from "../controllers/file.controller";
 const fileRouter: FastifyPluginAsync = async (fastify) => {
   auth.authRequiredHook(fastify);
 

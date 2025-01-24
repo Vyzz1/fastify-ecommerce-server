@@ -16,10 +16,11 @@ const orderSchema = new Schema({
     enum: ["Pending", "Confirmed", "Shipped", "Delivered", "Cancelled"],
     default: "Pending",
   },
-  orderdetails: [
+  OrderDetails: [
     {
       type: Schema.Types.ObjectId,
       ref: "OrderDetails",
+      required: true,
     },
   ],
   address: {

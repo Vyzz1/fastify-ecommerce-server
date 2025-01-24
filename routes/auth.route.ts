@@ -1,5 +1,5 @@
 import { FastifyPluginAsync } from "fastify";
-import authController from "../controller/auth.controller";
+import authController from "../controllers/auth.controller";
 import verifyJwt from "../hooks/validateJwt";
 const authRouter: FastifyPluginAsync = async (fastify) => {
   fastify.post<{ Body: LoginRequest }>("/login", {

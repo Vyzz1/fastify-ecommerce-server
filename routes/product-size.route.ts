@@ -1,5 +1,5 @@
 import { FastifyPluginAsync } from "fastify";
-import ProductVariantController from "../controller/product-variant.controller";
+import ProductVariantController from "../controllers/product-variant.controller";
 import {
   commonResponseSchema,
   errorResponse,

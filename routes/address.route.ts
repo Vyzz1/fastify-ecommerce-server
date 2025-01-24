@@ -1,5 +1,5 @@
 import { FastifyPluginAsync } from "fastify";
-import addressController from "../controller/address.controller";
+import addressController from "../controllers/address.controller";
 import auth from "../utils/auth";
 import {
   addressSchema,

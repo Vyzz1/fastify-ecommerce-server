@@ -5,7 +5,7 @@ import {
   commonResponseSchema,
   requiredIdParam,
 } from "../schemas";
-import ProductParentsController from "../controller/product-parent.controller";
+import ProductParentsController from "../controllers/product-parent.controller";
 import Category from "../models/category.model";
 // import auth from "../utils/auth";
 

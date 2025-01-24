@@ -1,6 +1,6 @@
 import { FastifyPluginAsync } from "fastify";
 import { brandSchema } from "../schemas";
-import ProductParentsController from "../controller/product-parent.controller";
+import ProductParentsController from "../controllers/product-parent.controller";
 import Brand from "../models/brand.model";
 
 const brandRouter: FastifyPluginAsync = async (fastify) => {
