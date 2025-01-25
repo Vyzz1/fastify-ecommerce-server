@@ -1,4 +1,4 @@
-type User = {
+interface User {
   id: number;
   firstName: string;
   lastName: string;
@@ -6,7 +6,7 @@ type User = {
   password: string;
   role: string;
   dob?: Date;
-};
+}
 
 interface LoginRequest {
   email: string;
@@ -73,4 +73,37 @@ interface ProductItemRequest {
 interface CartRequest {
   productItemId: string;
   quantity: number;
+}
+
+interface ProductRequest {
+  id: number;
+  name: string;
+  description: string;
+  avatar: string;
+  images: string[];
+  categoryId: string;
+  brandId: string;
+  price: number;
+  productColorId: string;
+  colorName: string;
+  sizes: string[];
+  showHomepage: boolean;
+}
+
+enum SortType {
+  Newest,
+  PriceDESC,
+  PriceASC,
+}
+interface FilterCriteria {
+  category?: string;
+  brand?: string;
+  color?: number[]; // List<Long> -> number[]
+  size?: string[]; // List<String> -> string[]
+  keyword?: string;
+  minPrice?: number; // Double -> number
+  maxPrice?: number; // Double -> number
+  sort?: SortType;
+  page?: number; // Default value can be assigned when used
+  limit?: number; // Default value can be assigned when used
 }

@@ -7,13 +7,11 @@ const addNewAddress: RouteHandler = async (req, reply) => {
 
     const existingAdress = await Address.findOne({ user: userId }).exec();
 
-    const isFirstAddress = !existingAdress;
-
     const address = new Address(req.body);
 
     address.user = userId;
 
-    address.isDefault = isFirstAddress;
+    address.isDefault = existingAdress ? false : true;
 
     await address.save();
 
@@ -28,10 +26,11 @@ const getAddressUser: RouteHandler = async (req, reply) => {
   try {
     const userId = req.user?.id;
 
-    const address = await Address.findOne({ user: userId }).exec();
+    const address = await Address.find({ user: userId }).exec();
 
     return reply.send(address ?? []);
   } catch (error) {
+    console.error("Error getting address:", error);
     throw new Error("Error getting address");
   }
 };

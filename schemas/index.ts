@@ -51,7 +51,6 @@ export const requiredIdParam = {
     type: "object",
     properties: {
       id: { type: "string" },
-      type: { type: "string" },
     },
     required: ["id"],
   },

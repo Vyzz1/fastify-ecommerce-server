@@ -64,7 +64,9 @@ const findProductItemById: RouteHandler<{ Params: { id: string } }> = async (
 ) => {
   const { id } = request.params;
 
-  const productItem = await ProductItem.findById(id).exec();
+  const productItem = await ProductItem.findById(id)
+    .populate("productSize")
+    .exec();
 
   if (!productItem) {
     return ErrorResponse.sendError(reply, "Product Item not found", 404);

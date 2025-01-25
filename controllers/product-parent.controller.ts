@@ -44,25 +44,30 @@ class ProductParentsController<T extends Document> {
     request,
     reply
   ) => {
-    const isDuplicate = await this.checkDuplicateProductVariantName(
-      request.body.name,
-      "create"
-    );
-
-    if (isDuplicate) {
-      return ErrorResponse.sendError(
-        reply,
-        "Product Variant name already exists",
-        409
+    try {
+      const isDuplicate = await this.checkDuplicateProductVariantName(
+        request.body.name,
+        "create"
       );
+
+      if (isDuplicate) {
+        return ErrorResponse.sendError(
+          reply,
+          "Product Variant name already exists",
+          409
+        );
+      }
+
+      const newProductVariant = new this.model({
+        ...request.body,
+      });
+
+      await newProductVariant.save();
+      return reply.code(201).send(newProductVariant);
+    } catch (error) {
+      console.log(error);
+      return ErrorResponse.sendError(reply, "error", 500);
     }
-
-    const newProductVariant = new this.model({
-      ...request.body,
-    });
-
-    await newProductVariant.save();
-    return reply.code(201).send(newProductVariant);
   };
 
   public handleGetAll: RouteHandler = async (_, reply) => {

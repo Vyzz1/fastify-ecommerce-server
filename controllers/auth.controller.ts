@@ -39,7 +39,11 @@ const loginController: RouteHandler<{ Body: LoginRequest }> = async (
     { expiresIn: "1d" }
   );
 
-  await User.updateOne({ email: user.email }, { refreshToken });
+  await User.findOneAndUpdate(
+    { email: user.email },
+    { refreshToken },
+    { new: true }
+  ).exec();
 
   const response = {
     ...user.toJSON(),
@@ -51,7 +55,9 @@ const loginController: RouteHandler<{ Body: LoginRequest }> = async (
     .cookie("refreshToken", refreshToken, {
       httpOnly: true,
       secure: true,
-      sameSite: "lax",
+      sameSite: "none",
+
+      maxAge: 1000 * 60 * 60 * 24,
       path: "/",
     })
     .send(response);
@@ -80,7 +86,7 @@ const registerController: RouteHandler<{ Body: User }> = async (
     const newUser = await User.create({
       ...request.body,
       password: newPassword,
-      role: "user",
+      role: "ROLE_USER",
     });
 
     reply.status(201).send(newUser);
@@ -92,6 +98,7 @@ const registerController: RouteHandler<{ Body: User }> = async (
 
 const refreshController: RouteHandler = async (request, reply) => {
   if (!request.cookies.refreshToken) {
+    console.log("No refresh token");
     ErrorResponse.sendError(reply, "Unauthorized", 401);
   }
 
@@ -100,11 +107,12 @@ const refreshController: RouteHandler = async (request, reply) => {
   const user = await User.findOne({ refreshToken }).exec();
 
   if (!user) {
+    console.log("No user found");
     return ErrorResponse.sendError(reply, "Unauthorized", 401);
   }
 
   const accessToken = jwt.sign(
-    { email: user.email, role: "user", id: user._id },
+    { email: user.email, role: user.role, id: user._id },
 
     process.env.ACCESS_TOKEN!,
     { expiresIn: "15m" }
@@ -128,14 +136,18 @@ const logoutController: RouteHandler = async (request, reply) => {
     return reply.send({ message: "Logout successfully" });
   }
 
-  foundUser.refreshToken = "";
+  const user = await User.updateOne(
+    { refreshToken },
+    { $unset: { refreshToken: 1 } }
+  ).exec();
 
-  await foundUser.save();
+  console.log(user);
 
-  reply.clearCookie("refresToken", {
+  reply.clearCookie("refreshToken", {
     httpOnly: true,
     secure: true,
-    sameSite: "lax",
+    sameSite: "none",
+    maxAge: 1000 * 60 * 60 * 24,
     path: "/",
   });
 

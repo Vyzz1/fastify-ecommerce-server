@@ -4,12 +4,18 @@ import productItemController from "../controllers/product-item.controller";
 import { errorResponse, requiredIdParam } from "../schemas";
 
 const productItemRouter: FastifyPluginAsync = async (fastify, opts) => {
-  auth.roleRequiredHook(fastify, "admin");
+  // auth.roleRequiredHook(fastify, "admin");
 
   fastify.post("/:productId", {
     handler: productItemController.createProductItem,
     schema: {
-      ...requiredIdParam,
+      params: {
+        type: "object",
+        properties: {
+          id: { type: "string" },
+        },
+        required: ["productId"],
+      },
       body: {
         type: "object",
         properties: {

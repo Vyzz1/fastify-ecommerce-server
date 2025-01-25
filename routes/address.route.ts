@@ -32,10 +32,6 @@ const addressRouter: FastifyPluginAsync = async (fastify, opts) => {
     handler: addressController.getAddressUser,
     schema: {
       response: {
-        200: {
-          type: "array",
-          items: addressSchema,
-        },
         ...errorResponse,
       },
     },

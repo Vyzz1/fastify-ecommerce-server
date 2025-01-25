@@ -16,6 +16,7 @@ import ProductSizeRouter from "./routes/product-size.route";
 import addressRouter from "./routes/address.route";
 import productItemRouter from "./routes/product-item.route";
 import shoppingCartRouter from "./routes/shopping-cart.route";
+import productRoutes from "./routes/product.route";
 
 const fastify = Fastify();
 
@@ -34,12 +35,6 @@ fastify.decorateRequest("user", null);
 // middlewares
 fastify.register(cookie, {
   secret: "mysecret",
-  parseOptions: {
-    httpOnly: true,
-    sameSite: "strict",
-    secure: true,
-    path: "/",
-  },
 });
 
 // register plugins
@@ -86,6 +81,14 @@ fastify.register(ProductSizeRouter, { prefix: "/size" });
 fastify.register(addressRouter, { prefix: "/address" });
 fastify.register(productItemRouter, { prefix: "/product-item" });
 fastify.register(shoppingCartRouter, { prefix: "/cart" });
+fastify.register(productRoutes, { prefix: "/product" });
+
+fastify.addHook("onRequest", async (req) => {
+  console.log(req.url);
+  console.log(req.method);
+  console.log(req.hostname);
+  console.log("Cookies", req.cookies.refreshToken);
+});
 
 // start the server
 
