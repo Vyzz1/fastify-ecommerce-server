@@ -17,6 +17,7 @@ import addressRouter from "./routes/address.route";
 import productItemRouter from "./routes/product-item.route";
 import shoppingCartRouter from "./routes/shopping-cart.route";
 import productRoutes from "./routes/product.route";
+import orderRoute from "./routes/order.route";
 
 const fastify = Fastify();
 
@@ -82,11 +83,11 @@ fastify.register(addressRouter, { prefix: "/address" });
 fastify.register(productItemRouter, { prefix: "/product-item" });
 fastify.register(shoppingCartRouter, { prefix: "/cart" });
 fastify.register(productRoutes, { prefix: "/product" });
+fastify.register(orderRoute, { prefix: "/order" });
 
 fastify.addHook("onRequest", async (req) => {
-  console.log(req.url);
-  console.log(req.method);
-  console.log(req.hostname);
+  console.log(`Request received: ${req.method} ${req.url} `);
+
   console.log("Cookies", req.cookies.refreshToken);
 });
 

@@ -104,6 +104,12 @@ const refreshController: RouteHandler = async (request, reply) => {
 
   const refreshToken = request.cookies.refreshToken;
 
+  jwt.verify(refreshToken!, process.env.REFRESH_TOKEN!, (err, user) => {
+    if (err) {
+      return ErrorResponse.sendError(reply, "Expired", 401);
+    }
+  });
+
   const user = await User.findOne({ refreshToken }).exec();
 
   if (!user) {
@@ -191,29 +197,6 @@ const updateUserInformation: RouteHandler<{ Body: User }> = async (
   return reply.send(user);
 };
 
-const updateAvatar: RouteHandler<{ Body: { avatar: string } }> = async (
-  request,
-  reply
-) => {
-  const email = request.user?.email;
-
-  if (!email) {
-    return ErrorResponse.sendError(reply, "Unauthorized", 401);
-  }
-
-  const user = await User.findOneAndUpdate(
-    { email },
-    { avatar: request.body.avatar },
-    { new: true }
-  ).exec();
-
-  if (!user) {
-    return ErrorResponse.sendError(reply, "User not found", 400);
-  }
-
-  return reply.send({ message: "Avatar updated successfully" });
-};
-
 const updatePassword: RouteHandler<{ Body: ChangePasswordRequest }> = async (
   request,
   reply
@@ -251,13 +234,36 @@ const updatePassword: RouteHandler<{ Body: ChangePasswordRequest }> = async (
   return reply.send({ message: "Password updated successfully" });
 };
 
+const handleUpdateAvatar: RouteHandler<{ Body: { photoUrl: string } }> = async (
+  req,
+  res
+) => {
+  try {
+    const id = req.user?.id;
+
+    const user = await User.findOneAndUpdate(
+      { _id: id },
+      { photoURL: req.body.photoUrl },
+      { new: true }
+    ).exec();
+
+    if (!user) {
+      return ErrorResponse.sendError(res, "User not found", 404);
+    }
+
+    return res.send({ photoURL: user.photoURL });
+  } catch (error) {
+    throw new Error("An error occurred");
+  }
+};
+
 export default {
   loginController,
   registerController,
   refreshController,
   logoutController,
   getUserInformation,
-  updateAvatar,
   updatePassword,
   updateUserInformation,
+  handleUpdateAvatar,
 };

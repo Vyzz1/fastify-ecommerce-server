@@ -89,14 +89,14 @@ const getSpecificAddress: RouteHandler<{ Params: { id: string } }> = async (
   }
 };
 
-const setDefaultAddress: RouteHandler<{ Params: { id: string } }> = async (
+const setDefaultAddress: RouteHandler<{ Body: { _id: string } }> = async (
   request,
   reply
 ) => {
   try {
     const userId = request.user?.id;
 
-    const address = await Address.findById(request.params.id).exec();
+    const address = await Address.findById(request.body._id).exec();
 
     if (!address) {
       return reply.status(404).send({ message: "Address not found" });

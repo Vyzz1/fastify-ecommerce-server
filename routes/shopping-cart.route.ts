@@ -2,9 +2,12 @@ import { FastifyPluginAsync } from "fastify";
 import auth from "../utils/auth";
 import shoppingCartController from "../controllers/shopping-cart.controller";
 import { commonResponseSchema, requiredIdParam } from "../schemas";
+import validateJwt from "../hooks/validateJwt";
 
 const shoppingCartRouter: FastifyPluginAsync = async (fastify, opts) => {
   auth.authRequiredHook(fastify);
+
+  // fastify.addHook("preHandler", validateJwt);
 
   fastify.post<{ Body: CartRequest }>("/", {
     handler: shoppingCartController.handleCreateShoppingCart,
@@ -42,7 +45,6 @@ const shoppingCartRouter: FastifyPluginAsync = async (fastify, opts) => {
     handler: shoppingCartController.handleDeleteCartItem,
     schema: {
       ...requiredIdParam,
-      ...commonResponseSchema({ message: { type: "string" } }),
     },
   });
 };

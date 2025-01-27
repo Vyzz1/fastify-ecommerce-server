@@ -23,7 +23,7 @@ const authRouter: FastifyPluginAsync = async (fastify) => {
             name: { type: "string" },
             role: { type: "string" },
             dob: { type: "string" },
-            photoUrl: { type: "string" },
+            photoURL: { type: "string" },
             token: { type: "string" },
           },
         },
@@ -86,17 +86,6 @@ const authRouter: FastifyPluginAsync = async (fastify) => {
     },
   });
 
-  fastify.put<{ Body: { avatar: string } }>("/avatar", {
-    preHandler: fastify.auth([verifyJwt]),
-    handler: authController.updateAvatar,
-    schema: {
-      response: {
-        200: { $ref: "CommonMessage#" },
-        "4xx": { $ref: "ErrorResponse#" },
-      },
-    },
-  });
-
   fastify.put<{ Body: ChangePasswordRequest }>(
     "/change-password",
     {
@@ -117,6 +106,17 @@ const authRouter: FastifyPluginAsync = async (fastify) => {
     },
     authController.updatePassword
   );
+
+  fastify.put<{ Body: { photoUrl: string } }>("/avatar", {
+    preHandler: fastify.auth([verifyJwt]),
+    handler: authController.handleUpdateAvatar,
+    schema: {
+      response: {
+        200: { photoURL: { type: "string" } },
+        "4xx": { $ref: "ErrorResponse#" },
+      },
+    },
+  });
 };
 
 export default authRouter;

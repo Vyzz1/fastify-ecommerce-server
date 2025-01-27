@@ -9,14 +9,21 @@ const shoppingCartItemSchema = new Schema({
   shoppingCart: {
     type: Schema.Types.ObjectId,
     ref: "ShoppingCart",
-    required: true,
+    required: false,
   },
   productItem: {
     type: Schema.Types.ObjectId,
     ref: "ProductItem",
     required: true,
   },
+  user: {
+    type: Schema.Types.ObjectId,
+    ref: "User",
+    required: false,
+  },
 });
+
+shoppingCartItemSchema.index({ productItem: 1, user: 1 }, { unique: true });
 
 const ShoppingCartItem =
   models?.ShoppingCartItem || model("ShoppingCartItem", shoppingCartItemSchema);

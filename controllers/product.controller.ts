@@ -26,8 +26,18 @@ const handleCreateProduct: RouteHandler<{ Body: ProductRequest }> = async (
       return ErrorResponse.sendError(res, "Color not found", 404);
     }
 
+    const images = new Set(req.body.images);
+
+    console.log(images);
+
     const newProduct = await Product.create({
-      ...req.body,
+      price: req.body.price,
+      name: req.body.name,
+      description: req.body.description,
+      avatar: req.body.avatar,
+      images: Array.from(images),
+      showHomepage: false,
+
       brand: brand._id,
       category: category._id,
       productColor: color._id,
@@ -81,9 +91,17 @@ const handleUpdateProduct: RouteHandler<{
       product.productColor = color._id;
     }
 
-    Object.assign(product, request.body);
+    product.name = request.body.name;
+    product.price = request.body.price;
+
+    product.description = request.body.description;
+
+    product.avatar = request.body.avatar;
+    product.images = request.body.images;
+
     await product.save();
-    return reply.send(product);
+
+    return reply.send(product.toJSON());
   } catch (error) {
     console.log(error);
     throw new Error("An error occurred");
@@ -199,8 +217,21 @@ const handleGetShowOnHomepage: RouteHandler = async (req, res) => {
       })
       .lean();
 
-    return res.send(products);
+    const transformedProducts = products.map((product) => {
+      const sizes = (product.productItems as any[]).map(
+        (item) => item.productSize.value
+      );
+
+      return {
+        ...product,
+        colorName: (product.productColor as any).value,
+        sizes,
+      };
+    });
+
+    return res.send(transformedProducts);
   } catch (error) {
+    console.error(error);
     return ErrorResponse.sendError(res, "error", 500);
   }
 };
@@ -226,17 +257,82 @@ const handleDeteleProduct: RouteHandler<{ Params: { id: string } }> = async (
   }
 };
 
-const handleGetConfigForProduct: RouteHandler<{
+const handleUpdtateShowOnHomepage: RouteHandler<{
   Params: { id: string };
+  Body: { showHomepage: boolean };
 }> = async (req, res) => {
   try {
-    const config = await ProductItem.find({ product: req.params.id })
-      .populate("productSize")
+    const { id } = req.params;
+
+    const product = await Product.findOneAndUpdate({ _id: id }, req.body, {
+      new: true,
+    }).exec();
+
+    if (!product) {
+      return ErrorResponse.sendError(res, "Product not found", 404);
+    }
+
+    return res.send(product);
+  } catch (error) {
+    console.log(error);
+    throw new Error("An error occurred");
+  }
+};
+
+const handleGetRelatedProducts: RouteHandler<{
+  Params: { id: string };
+}> = async (request, reply) => {
+  try {
+    const product = await Product.findById(request.params.id).exec();
+
+    if (!product) {
+      return ErrorResponse.sendError(reply, "Product not found", 404);
+    }
+
+    const relatedProducts = await Product.find({
+      category: product.category,
+      _id: { $ne: product._id },
+    })
+      .limit(4)
       .select("-__v")
+      .populate({
+        path: "brand",
+        select: "-__v",
+      })
+      .populate({
+        path: "category",
+        select: "-__v",
+      })
+      .populate({
+        path: "productColor",
+        select: "-__v",
+      })
+      .populate({
+        path: "productItems",
+        select: "-__v",
+        populate: {
+          path: "productSize",
+          model: "ProductSize",
+          select: "-__v",
+        },
+      })
       .lean();
 
-    return res.send({ ...config });
+    const transformedProducts = relatedProducts.map((product) => {
+      const sizes = (product.productItems as any[]).map(
+        (item) => item.productSize.value
+      );
+
+      return {
+        ...product,
+        colorName: (product.productColor as any).value,
+        sizes,
+      };
+    });
+
+    return reply.send(transformedProducts);
   } catch (error) {
+    console.log(error);
     throw new Error("An error occurred");
   }
 };
@@ -248,5 +344,6 @@ export default {
   handleGetShowOnHomepage,
   handleGetAllProducts,
   handleDeteleProduct,
-  handleGetConfigForProduct,
+  handleUpdtateShowOnHomepage,
+  handleGetRelatedProducts,
 };

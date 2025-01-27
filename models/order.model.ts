@@ -16,7 +16,7 @@ const orderSchema = new Schema({
     enum: ["Pending", "Confirmed", "Shipped", "Delivered", "Cancelled"],
     default: "Pending",
   },
-  OrderDetails: [
+  orderDetails: [
     {
       type: Schema.Types.ObjectId,
       ref: "OrderDetails",

@@ -4,6 +4,8 @@ const validateRole = function (...requiredRole: string[]) {
   return async function (request: FastifyRequest, reply: FastifyReply) {
     const userRole = request.user!.role;
 
+    console.log("User role: ", userRole);
+
     if (!userRole || !requiredRole.includes(userRole)) {
       reply.code(403).send({ message: "Forbidden" });
     }

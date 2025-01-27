@@ -53,7 +53,7 @@ interface AddressRequest {
 }
 
 interface OrderRequest {
-  address: AddressRequest;
+  address: string;
   total: number;
   shippingFee: number;
   orderDetails: OrderDetailsRequest[];

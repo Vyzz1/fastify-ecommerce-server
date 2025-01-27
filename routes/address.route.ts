@@ -37,6 +37,17 @@ const addressRouter: FastifyPluginAsync = async (fastify, opts) => {
     },
   });
 
+  fastify.put<{ Body: { _id: string } }>("/set-default", {
+    handler: addressController.setDefaultAddress,
+    schema: {
+      body: {
+        type: "object",
+        required: ["_id"],
+      },
+      ...commonResponseSchema({ message: { type: "string" } }),
+    },
+  });
+
   fastify.put("/:id", {
     handler: addressController.updateAddress,
     schema: {
@@ -69,14 +80,6 @@ const addressRouter: FastifyPluginAsync = async (fastify, opts) => {
     schema: {
       ...requiredIdParam,
       ...commonResponseSchema(addressSchema),
-    },
-  });
-
-  fastify.put("/:id/default", {
-    handler: addressController.setDefaultAddress,
-    schema: {
-      ...requiredIdParam,
-      ...commonResponseSchema({ message: { type: "string" } }),
     },
   });
 };

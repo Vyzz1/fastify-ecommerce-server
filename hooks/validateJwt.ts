@@ -1,7 +1,7 @@
 import { preHandlerHookHandler } from "fastify";
 import jwt, { JwtPayload } from "jsonwebtoken";
 import { ErrorResponse } from "../errors/ErrorResponse";
-const validateJwt: preHandlerHookHandler = async (request, reply, done) => {
+const validateJwt: preHandlerHookHandler = async (request, reply) => {
   const auth = request.headers.authorization;
   if (!auth) {
     throw new Error("Unauthorized");
@@ -18,10 +18,8 @@ const validateJwt: preHandlerHookHandler = async (request, reply, done) => {
       role: (decoded as JwtPayload).role,
       id: (decoded as JwtPayload).id,
     };
-
-    console.log(request.user);
   });
-  done();
+  // return reply;
 };
 
 export default validateJwt;

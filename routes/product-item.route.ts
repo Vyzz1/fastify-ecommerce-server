@@ -67,6 +67,16 @@ const productItemRouter: FastifyPluginAsync = async (fastify, opts) => {
       },
     },
   });
+
+  fastify.get("/config/:id", {
+    handler: productItemController.handleGetConfig,
+    schema: {
+      ...requiredIdParam,
+      response: {
+        ...errorResponse,
+      },
+    },
+  });
 };
 
 export default productItemRouter;

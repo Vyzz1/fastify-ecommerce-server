@@ -2,8 +2,10 @@ import { RouteHandler } from "fastify";
 import Order from "../models/order.model";
 import ProductItem from "../models/product-item.model";
 import OrderDetails from "../models/order-details.model";
-import { request } from "http";
-import Product from "../models/product.model";
+import Address from "../models/address.model";
+import { ErrorResponse } from "../errors/ErrorResponse";
+import { populate } from "dotenv";
+import path from "path";
 
 const createOrder: RouteHandler<{ Body: OrderRequest }> = async (req, res) => {
   try {
@@ -15,22 +17,50 @@ const createOrder: RouteHandler<{ Body: OrderRequest }> = async (req, res) => {
 
     const { address, total, shippingFee, orderDetails } = req.body;
 
-    const formattedAddress = `${address.province}, ${address.district}, ${address.ward}`;
+    const findAddress = await Address.findById(address).exec();
+
+    if (!findAddress) {
+      return ErrorResponse.sendError(res, "Address not found", 404);
+    }
+
+    const formattedAddress = `${findAddress.province}, ${findAddress.district}, ${findAddress.ward}`;
 
     const orderDetailsIds = await createOrderDetails(orderDetails);
 
-    await Order.create({
+    const newOrder = await Order.create({
       user: userId,
       address: formattedAddress,
-      fullName: address.fullName,
-      phoneNumber: address.phoneNumber,
-      specify: address.specify,
+      fullName: findAddress.fullName,
+      phoneNumber: findAddress.phoneNumber,
+      specify: findAddress.specify,
       total,
       shippingFee,
       orderDetails: orderDetailsIds,
     });
+    await newOrder.populate({
+      path: "orderDetails",
 
-    res.code(201).send({ message: "Order created" });
+      populate: {
+        path: "productItem",
+        select: "quantity",
+        populate: [
+          {
+            path: "product",
+            select: "name price avatar",
+            populate: {
+              path: "productColor",
+              select: "value",
+            },
+          },
+          {
+            path: "productSize",
+            select: "value",
+          },
+        ],
+      },
+    });
+
+    res.code(201).send(newOrder);
   } catch (error) {
     console.log(error);
     throw new Error("Error while creating order");
@@ -69,23 +99,6 @@ async function createOrderDetails(
   return Ids;
 }
 
-const getUserOrders: RouteHandler = async (req, res) => {
-  try {
-    const userId = req.user?.id;
-
-    if (!userId) {
-      throw new Error("User not found");
-    }
-
-    const orders = await Order.find({ user: userId }).populate("orderdetails");
-
-    res.send({ orders });
-  } catch (error) {
-    console.log(error);
-    throw new Error("Error while getting user orders");
-  }
-};
-
 const getOrderById: RouteHandler<{ Params: { id: string } }> = async (
   req,
   res
@@ -93,23 +106,40 @@ const getOrderById: RouteHandler<{ Params: { id: string } }> = async (
   try {
     const orderId = req.params.id;
 
-    const order = await Order.findById(orderId);
+    const order = await Order.findById(orderId)
+      .populate({
+        path: "orderDetails",
 
-    const orderDetails = await OrderDetails.find({
-      _id: {
-        $in:
-          order?.OrderDetails.map(
-            (orderDetail: { _id: any }) => orderDetail._id
-          ) || [],
-      },
-    });
+        populate: {
+          path: "productItem",
+          select: "quantity",
+          populate: [
+            {
+              path: "product",
+              select: "name price avatar",
+              populate: {
+                path: "productColor",
+                select: "value",
+              },
+            },
+            {
+              path: "productSize",
+              select: "value",
+            },
+          ],
+        },
+      })
+      .lean()
+      .exec();
 
     if (!order) {
       throw new Error("Order not found");
     }
 
-    res.send({ order });
+    res.send(order);
   } catch (error) {
+    console.log(error);
+
     throw new Error("Error while getting order by id");
   }
 };
@@ -152,10 +182,51 @@ const deleteOrder: RouteHandler<{ Params: { id: string } }> = async (
   }
 };
 
+const handleGetUsersOrders: RouteHandler = async (req, res) => {
+  try {
+    const userId = req.user?.id;
+
+    if (!userId) {
+      return ErrorResponse.sendError(res, "Unauthorized", 401);
+    }
+
+    const orders = await Order.find({ user: userId })
+      .populate([
+        {
+          path: "orderDetails",
+          populate: {
+            path: "productItem",
+            select: "quantity",
+            populate: [
+              {
+                path: "product",
+                select: "name price avatar",
+                populate: {
+                  path: "productColor",
+                  select: "value",
+                },
+              },
+              {
+                path: "productSize",
+                select: "value",
+              },
+            ],
+          },
+        },
+      ])
+      .lean();
+
+    return res.send(orders || []);
+  } catch (error) {
+    console.error(error);
+    throw new Error("An error occurred");
+  }
+};
+
 export default {
-  getUserOrders,
   createOrder,
   getOrderById,
   updateOrderStatus,
   deleteOrder,
+  handleGetUsersOrders,
 };

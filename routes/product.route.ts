@@ -49,21 +49,38 @@ const productRoutes: FastifyPluginAsync = async (fastify) => {
     ...auth.requiredRole(fastify, "ROLE_ADMIN"),
   });
 
-  fastify.get("/:id/config", {
-    handler: productController.handleGetConfigForProduct,
+  fastify.delete<{ Params: { id: string } }>("/:id", {
+    handler: productController.handleDeteleProduct,
     schema: {
       ...requiredIdParam,
+      ...commonResponseSchema({ message: { type: "string" } }),
+    },
+  });
+
+  fastify.put("/show/:id", {
+    handler: productController.handleUpdtateShowOnHomepage,
+    schema: {
+      ...requiredIdParam,
+      body: {
+        type: "object",
+        properties: {
+          showHomepage: { type: "boolean" },
+        },
+        required: ["showHomepage"],
+      },
       response: {
         ...errorResponse,
       },
     },
   });
 
-  fastify.delete<{ Params: { id: string } }>("/:id", {
-    handler: productController.handleDeteleProduct,
+  fastify.get("/random/:id", {
+    handler: productController.handleGetRelatedProducts,
     schema: {
       ...requiredIdParam,
-      ...commonResponseSchema({ message: { type: "string" } }),
+      response: {
+        ...errorResponse,
+      },
     },
   });
 

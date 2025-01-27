@@ -117,9 +117,30 @@ const updateProductItem: RouteHandler<{
   return reply.send(productItem);
 };
 
+const handleGetConfig: RouteHandler<{ Params: { id: string } }> = async (
+  request,
+  reply
+) => {
+  try {
+    const { id } = request.params;
+
+    const productItem = await ProductItem.find({ product: id })
+      .populate("productSize")
+      .exec();
+
+    return reply.send(productItem || []);
+  } catch (error) {
+    return ErrorResponse.sendError(reply, "An error occurred", 500);
+
+    throw new Error("An error occurred");
+  }
+};
+
 export default {
   findProductItemById,
   createProductItem,
   deleteOneProductItem,
   updateProductItem,
+
+  handleGetConfig,
 };

@@ -66,7 +66,7 @@ class ProductVariantController<T extends Document> {
   };
 
   public handleGetAll: RouteHandler = async (_, reply) => {
-    const productVariants = await this.model.find().exec();
+    const productVariants = await this.model.find().sort({ value: 1 }).exec();
     return reply.send(productVariants);
   };
 
