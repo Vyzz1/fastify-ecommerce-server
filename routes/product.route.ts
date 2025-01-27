@@ -85,6 +85,33 @@ const productRoutes: FastifyPluginAsync = async (fastify) => {
   });
 
   fastify.get("/show-on-homepage", productController.handleGetShowOnHomepage);
+
+  fastify.get("/search", {
+    handler: productController.handleSearchAutoComplete,
+    schema: {
+      querystring: {
+        type: "object",
+        properties: {
+          name: { type: "string" },
+        },
+        required: ["name"],
+      },
+      response: {
+        ...errorResponse,
+      },
+    },
+  });
+
+  fastify.get<{ Querystring: FilterCriteria }>("/filter", {
+    handler: productController.handleFilterProducts,
+    schema: {
+      querystring: {
+        type: "object",
+
+        required: ["page"],
+      },
+    },
+  });
 };
 
 export default productRoutes;

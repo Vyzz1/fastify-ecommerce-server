@@ -90,20 +90,15 @@ interface ProductRequest {
   showHomepage: boolean;
 }
 
-enum SortType {
-  Newest,
-  PriceDESC,
-  PriceASC,
-}
 interface FilterCriteria {
   category?: string;
   brand?: string;
-  color?: number[]; // List<Long> -> number[]
-  size?: string[]; // List<String> -> string[]
+  color?: string; // List<Long> -> number[]
+  size?: string; // List<String> -> string[]
   keyword?: string;
   minPrice?: number; // Double -> number
   maxPrice?: number; // Double -> number
-  sort?: SortType;
+  sort?: "Newest" | "PriceDESC" | "PriceASC"; // Enum -> string
   page?: number; // Default value can be assigned when used
   limit?: number; // Default value can be assigned when used
 }

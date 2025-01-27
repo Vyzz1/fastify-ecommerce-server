@@ -257,6 +257,40 @@ const handleUpdateAvatar: RouteHandler<{ Body: { photoUrl: string } }> = async (
   }
 };
 
+const handleGetAllUser: RouteHandler = async (req, res) => {
+  try {
+    if (req.user?.role !== "ROLE_ADMIN") {
+      return ErrorResponse.sendError(res, "Unauthorized", 401);
+    }
+    const users = await User.find({
+      role: {
+        $ne: "ROLE_ADMIN",
+      },
+    }).exec();
+
+    return res.send(users);
+  } catch (error) {
+    throw new Error("An error occurred");
+  }
+};
+
+const handleDeleteUserById: RouteHandler<{ Params: { id: string } }> = async (
+  req,
+  res
+) => {
+  try {
+    const user = await User.findByIdAndDelete(req.params.id).exec();
+
+    if (!user) {
+      return ErrorResponse.sendError(res, "User not found", 404);
+    }
+
+    return res.code(204).send();
+  } catch (error) {
+    throw new Error("An error occurred");
+  }
+};
+
 export default {
   loginController,
   registerController,
@@ -266,4 +300,6 @@ export default {
   updatePassword,
   updateUserInformation,
   handleUpdateAvatar,
+  handleGetAllUser,
+  handleDeleteUserById,
 };

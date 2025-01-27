@@ -5,6 +5,7 @@ import Category from "../models/category.model";
 import ProductColor from "../models/product-color.model";
 import Product from "../models/product.model";
 import ProductItem from "../models/product-item.model";
+import ProductSize from "../models/product-size.model";
 
 const handleCreateProduct: RouteHandler<{ Body: ProductRequest }> = async (
   req,
@@ -56,55 +57,90 @@ const handleUpdateProduct: RouteHandler<{
 }> = async (request, reply) => {
   try {
     const { id } = request.params;
+    const {
+      brandId,
+      categoryId,
+      productColorId,
+      name,
+      price,
+      description,
+      avatar,
+      images,
+    } = request.body;
 
-    let product = await Product.findById(id).exec();
-
+    // Find the product
+    const product = await Product.findById(id).exec();
     if (!product) {
       return ErrorResponse.sendError(reply, "Product not found", 404);
     }
 
-    if (request.body.brandId !== product.brand.toString()) {
-      const brand = await Brand.findById(request.body.brandId).exec();
+    // Update brand if needed
+    if (brandId && brandId !== product.brand?.toString()) {
+      const brand = await Brand.findById(brandId).exec();
       if (!brand) {
-        return ErrorResponse.sendError(reply, "Not found", 404);
+        return ErrorResponse.sendError(reply, "Brand not found", 404);
       }
-
       product.brand = brand._id;
     }
 
-    if (request.body.categoryId !== product.category.toString()) {
-      const category = await Category.findById(request.body.categoryId).exec();
-
+    // Update category if needed
+    if (categoryId && categoryId !== product.category?.toString()) {
+      const category = await Category.findById(categoryId).exec();
       if (!category) {
-        return ErrorResponse.sendError(reply, "Not found", 404);
+        return ErrorResponse.sendError(reply, "Category not found", 404);
       }
       product.category = category._id;
     }
 
-    if (request.body.productColorId !== product.productColor.toString()) {
-      const color = await ProductColor.findById(
-        request.body.productColorId
-      ).exec();
+    // Update product color if needed
+    if (productColorId && productColorId !== product.productColor?.toString()) {
+      const color = await ProductColor.findById(productColorId).exec();
       if (!color) {
-        return ErrorResponse.sendError(reply, "Not found", 404);
+        return ErrorResponse.sendError(reply, "Product color not found", 404);
       }
       product.productColor = color._id;
     }
 
-    product.name = request.body.name;
-    product.price = request.body.price;
+    // Update other fields
+    product.name = name || product.name;
+    product.price = price || product.price;
+    product.description = description || product.description;
+    product.avatar = avatar || product.avatar;
+    product.images = images || product.images;
 
-    product.description = request.body.description;
-
-    product.avatar = request.body.avatar;
-    product.images = request.body.images;
-
+    // Save updated product
     await product.save();
 
-    return reply.send(product.toJSON());
+    // Populate the necessary fields for consistent response
+    const updatedProduct = await product.populate([
+      { path: "brand", select: "-__v" },
+      { path: "category", select: "-__v" },
+      { path: "productColor", select: "-__v" },
+      {
+        path: "productItems",
+        select: "-__v",
+        populate: {
+          path: "productSize",
+          model: "ProductSize",
+          select: "-__v",
+        },
+      },
+    ]);
+
+    // Return the response in the desired format
+    return reply.send({
+      ...updatedProduct.toJSON(),
+      colorName: (updatedProduct.productColor as any).value,
+      categoryId: updatedProduct.category?._id,
+      brandId: updatedProduct.brand?._id,
+      productColorId: updatedProduct.productColor?._id,
+      sizes: updatedProduct.productItems?.map(
+        (item: any) => item.productSize?.value
+      ),
+    });
   } catch (error) {
-    console.log(error);
-    throw new Error("An error occurred");
+    console.error(error);
+    return ErrorResponse.sendError(reply, "An error occurred", 500);
   }
 };
 
@@ -337,6 +373,197 @@ const handleGetRelatedProducts: RouteHandler<{
   }
 };
 
+const handleSearchAutoComplete: RouteHandler<{
+  Querystring: { name: string };
+}> = async (req, res) => {
+  try {
+    const { name: productName } = req.query;
+
+    if (!productName) {
+      return ErrorResponse.sendError(res, "Name is required", 400);
+    }
+
+    const pipeline = [
+      {
+        $search: {
+          index: "default",
+          autocomplete: {
+            query: productName,
+            path: "name",
+            fuzzy: {
+              maxEdits: 2,
+              prefixLength: 0,
+              maxExpansions: 50,
+            },
+          },
+        },
+      },
+    ];
+
+    const products = await Product.aggregate(pipeline);
+
+    return res.send(products);
+  } catch (error) {
+    throw new Error("An error occurred");
+  }
+};
+const handleFilterProducts: RouteHandler<{
+  Querystring: FilterCriteria;
+}> = async (req, res) => {
+  try {
+    const criteria = req.query;
+
+    // Xử lý size filter đầu tiên
+    let sizeProductItemIds: any[] = [];
+    if (criteria.size?.length) {
+      // Bước 1: Tìm các ProductSize phù hợp
+      const sizes = await ProductSize.find({
+        value: { $in: criteria.size },
+      })
+        .select("_id")
+        .lean();
+
+      // Bước 2: Tìm các ProductItem liên quan
+      const productItems = await ProductItem.find({
+        productSize: { $in: sizes.map((s) => s._id) },
+      })
+        .select("_id")
+        .lean();
+
+      sizeProductItemIds = productItems.map((item) => item._id);
+    }
+
+    // Xây dựng query chính
+    const query: any = {};
+
+    // Category
+    if (criteria.category && criteria.category !== "all") {
+      query.category = criteria.category;
+    }
+
+    // Brand
+    if (criteria.brand && criteria.brand !== "all") {
+      query.brand = criteria.brand;
+    }
+
+    // Color
+    if (criteria.color?.length) {
+      query.productColor = { $in: criteria.color.split(",") };
+    }
+
+    // Keyword
+    if (criteria.keyword) {
+      query.name = { $regex: criteria.keyword, $options: "i" };
+    }
+
+    // Price range
+    if (criteria.minPrice !== undefined || criteria.maxPrice !== undefined) {
+      query.price = {};
+      if (criteria.minPrice !== undefined) query.price.$gte = criteria.minPrice;
+      if (criteria.maxPrice !== undefined) query.price.$lte = criteria.maxPrice;
+    }
+
+    // Size
+    if (sizeProductItemIds.length) {
+      query.productItems = { $in: sizeProductItemIds };
+    }
+
+    // Sorting
+    const sortOptions: any = {};
+    switch (criteria.sort) {
+      case "Newest":
+        sortOptions.createdAt = -1;
+        break;
+      case "PriceDESC":
+        sortOptions.price = -1;
+        break;
+      case "PriceASC":
+        sortOptions.price = 1;
+        break;
+      default:
+        sortOptions.createdAt = -1;
+    }
+
+    // Pagination
+    const page = criteria.page || 0;
+    const limit = criteria.limit || 6;
+    const skip = page * limit;
+
+    // Thực hiện query với virtual populate
+    const [products, total] = await Promise.all([
+      Product.find(query)
+        .select("-__v")
+        .populate({
+          path: "brand",
+          select: "-__v",
+        })
+        .populate({
+          path: "category",
+          select: "-__v",
+        })
+        .populate({
+          path: "productColor",
+          select: "-__v",
+        })
+        .populate({
+          path: "productItems",
+          select: "-__v",
+          populate: {
+            path: "productSize",
+            model: "ProductSize",
+            select: "-__v",
+          },
+        })
+        .sort(sortOptions)
+        .skip(skip)
+        .limit(limit)
+        .lean(),
+
+      Product.countDocuments(query),
+    ]);
+
+    // Lọc lại các product có ít nhất 1 product item hợp lệ
+
+    const filteredProducts = products.filter((product) =>
+      criteria.size?.length && criteria?.size !== undefined
+        ? product.productItems.some(
+            (item: any) =>
+              item.productSize &&
+              criteria!.size!.split(",").includes(item.productSize.value)
+          )
+        : true
+    );
+
+    // Tính toán phân trang
+    const totalPages = Math.ceil(total / limit);
+    const currentPage = page;
+
+    const transformedProducts = filteredProducts.map((product) => ({
+      ...product,
+      colorName: (product.productColor as any).value,
+      sizes: (product.productItems as any[]).map(
+        (item) => item.productSize?.value
+      ),
+    }));
+
+    return res.send({
+      content: transformedProducts,
+      total,
+      page: currentPage,
+      limit,
+      totalPages,
+      last: currentPage >= totalPages - 1,
+      next: currentPage < totalPages - 1,
+      pageable: {
+        pageNumber: parseInt(currentPage.toString()),
+      },
+    });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).send({ message: "Internal server error" });
+  }
+};
+
 export default {
   handleCreateProduct,
   handleUpdateProduct,
@@ -346,4 +573,6 @@ export default {
   handleDeteleProduct,
   handleUpdtateShowOnHomepage,
   handleGetRelatedProducts,
+  handleSearchAutoComplete,
+  handleFilterProducts,
 };

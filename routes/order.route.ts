@@ -22,6 +22,26 @@ const orderRoute: FastifyPluginAsync = async (fastify, opts) => {
     },
   });
 
+  fastify.put<{ Body: { status: string }; Params: { id: string } }>(
+    "/:id",
+
+    {
+      ...auth.requiredRole(fastify, "ROLE_ADMIN"),
+      handler: orderController.updateOrderStatus,
+      schema: {
+        body: {
+          type: "object",
+          required: ["status"],
+          properties: {
+            status: { type: "string" },
+          },
+        },
+        ...requiredIdParam,
+        ...commonResponseSchema({ message: { type: "string" } }),
+      },
+    }
+  );
+
   fastify.delete<{ Params: { id: string } }>("/:id", {
     ...auth.requiredRole(fastify, "ROLE_ADMIN"),
     handler: orderController.deleteOrder,
@@ -55,6 +75,27 @@ const orderRoute: FastifyPluginAsync = async (fastify, opts) => {
       ),
     },
   });
+
+  fastify.get(
+    "/all",
+
+    {
+      ...auth.requiredRole(fastify, "ROLE_ADMIN"),
+      handler: orderController.handleGetAllOrders,
+      schema: {
+        ...commonResponseSchema(
+          {
+            items: {
+              type: "object",
+              properties: orderSchema,
+            },
+          },
+          200,
+          "array"
+        ),
+      },
+    }
+  );
 };
 
 export default orderRoute;

@@ -1,6 +1,8 @@
 import { FastifyPluginAsync } from "fastify";
 import authController from "../controllers/auth.controller";
 import verifyJwt from "../hooks/validateJwt";
+import { requiredIdParam } from "../schemas";
+import auth from "../utils/auth";
 const authRouter: FastifyPluginAsync = async (fastify) => {
   fastify.post<{ Body: LoginRequest }>("/login", {
     handler: authController.loginController,
@@ -114,6 +116,31 @@ const authRouter: FastifyPluginAsync = async (fastify) => {
       response: {
         200: { photoURL: { type: "string" } },
         "4xx": { $ref: "ErrorResponse#" },
+      },
+    },
+  });
+
+  fastify.get("/all-users", {
+    ...auth.requiredRole(fastify, "ROLE_ADMIN"),
+    handler: authController.handleGetAllUser,
+    schema: {
+      response: {
+        200: {
+          type: "array",
+          items: { $ref: "User#" },
+        },
+        "4xx": { $ref: "ErrorResponse#" },
+      },
+    },
+  });
+
+  fastify.delete<{ Params: { id: string } }>("/:id", {
+    ...auth.requiredRole(fastify, "ROLE_ADMIN"),
+    handler: authController.handleDeleteUserById,
+    schema: {
+      ...requiredIdParam,
+      response: {
+        204: { type: "object" },
       },
     },
   });

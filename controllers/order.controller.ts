@@ -23,7 +23,9 @@ const createOrder: RouteHandler<{ Body: OrderRequest }> = async (req, res) => {
       return ErrorResponse.sendError(res, "Address not found", 404);
     }
 
-    const formattedAddress = `${findAddress.province}, ${findAddress.district}, ${findAddress.ward}`;
+    const formattedAddress = `${findAddress.province.split("-")[1]}, ${
+      findAddress.district.split("-")[1]
+    }, ${findAddress.ward}`;
 
     const orderDetailsIds = await createOrderDetails(orderDetails);
 
@@ -152,11 +154,60 @@ const updateOrderStatus: RouteHandler<{
     const orderId = req.params.id;
     const { status } = req.body;
 
-    await Order.findByIdAndUpdate(orderId, { status });
+    const order = await Order.findByIdAndUpdate(orderId, { status });
+
+    if (!order) {
+      throw new Error("Order not found");
+    }
 
     res.send({ message: "Order status updated" });
   } catch (error) {
     throw new Error("Error while updating order status");
+  }
+};
+
+const handleGetAllOrders: RouteHandler = async (req, res) => {
+  try {
+    const role = req.user?.role;
+    if (role !== "ROLE_ADMIN") {
+      return ErrorResponse.sendError(res, "Unauthorized", 401);
+    }
+
+    const orders = await Order.find()
+      .populate([
+        {
+          path: "orderDetails",
+          populate: {
+            path: "productItem",
+            select: "quantity",
+            populate: [
+              {
+                path: "product",
+                select: "name price avatar",
+                populate: {
+                  path: "productColor",
+                  select: "value",
+                },
+              },
+              {
+                path: "productSize",
+                select: "value",
+              },
+            ],
+          },
+        },
+        {
+          path: "user",
+          select: "email firstName lastName photoURL",
+        },
+      ])
+      .lean();
+
+    return res.send(orders || []);
+  } catch (error) {
+    console.error(error);
+
+    throw new Error("An error occurred");
   }
 };
 
@@ -214,6 +265,7 @@ const handleGetUsersOrders: RouteHandler = async (req, res) => {
           },
         },
       ])
+      .sort({ createdAt: -1 })
       .lean();
 
     return res.send(orders || []);
@@ -229,4 +281,5 @@ export default {
   updateOrderStatus,
   deleteOrder,
   handleGetUsersOrders,
+  handleGetAllOrders,
 };
