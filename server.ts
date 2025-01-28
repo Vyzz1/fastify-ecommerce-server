@@ -18,6 +18,7 @@ import productItemRouter from "./routes/product-item.route";
 import shoppingCartRouter from "./routes/shopping-cart.route";
 import productRoutes from "./routes/product.route";
 import orderRoute from "./routes/order.route";
+import passwordRouter from "./routes/password.route";
 
 const fastify = Fastify();
 
@@ -84,6 +85,7 @@ fastify.register(productItemRouter, { prefix: "/product-item" });
 fastify.register(shoppingCartRouter, { prefix: "/cart" });
 fastify.register(productRoutes, { prefix: "/product" });
 fastify.register(orderRoute, { prefix: "/order" });
+fastify.register(passwordRouter, { prefix: "/password" });
 
 fastify.addHook("onRequest", async (req) => {
   console.log(`Request received: ${req.method} ${req.url} `);

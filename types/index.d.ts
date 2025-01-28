@@ -102,3 +102,10 @@ interface FilterCriteria {
   page?: number; // Default value can be assigned when used
   limit?: number; // Default value can be assigned when used
 }
+
+interface ForgotPasswordRequest {
+  email: string;
+  password: string;
+  token: string;
+  otp: string;
+}

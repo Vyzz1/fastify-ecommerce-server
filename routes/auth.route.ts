@@ -144,6 +144,24 @@ const authRouter: FastifyPluginAsync = async (fastify) => {
       },
     },
   });
+  fastify.post("/change-password", {
+    ...auth.requiredAuth(fastify),
+    handler: authController.updatePassword,
+    schema: {
+      body: {
+        type: "object",
+        required: ["currentPassword", "newPassword"],
+        properties: {
+          currentPassword: { type: "string" },
+          newPassword: { type: "string" },
+        },
+      },
+      response: {
+        200: { message: { type: "string" } },
+        "4xx": { $ref: "ErrorResponse#" },
+      },
+    },
+  });
 };
 
 export default authRouter;
