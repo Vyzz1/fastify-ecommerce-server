@@ -160,6 +160,7 @@ const handleGetAllProducts: RouteHandler = async (_, reply) => {
         path: "productColor",
         select: "-__v",
       })
+      .sort({ createdAt: -1 })
       .lean();
 
     return reply.send(

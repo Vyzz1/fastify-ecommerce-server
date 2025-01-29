@@ -96,6 +96,20 @@ const orderRoute: FastifyPluginAsync = async (fastify, opts) => {
       },
     }
   );
+
+  fastify.get("/payment", {
+    handler: orderController.handleGetByReferenceId,
+    schema: {
+      query: {
+        type: "object",
+        required: ["referenceId"],
+        properties: {
+          referenceId: { type: "string" },
+        },
+      },
+      ...commonResponseSchema(orderSchema),
+    },
+  });
 };
 
 export default orderRoute;

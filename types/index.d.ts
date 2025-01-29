@@ -57,18 +57,34 @@ interface OrderRequest {
   total: number;
   shippingFee: number;
   orderDetails: OrderDetailsRequest[];
+  method: string;
+  statusPay?: string;
+  referenceId?: string;
 }
 
 interface OrderDetailsRequest {
   productItemId: string;
   quantity: number;
 }
+type ProductPaymentRequest = {
+  quantity: number;
+  productItem: ProductItemRequest & {
+    product: {
+      _id: string;
+      name: string;
+      price: number;
+      avatar: string;
+      productColor: ProductVariants;
+    };
+  };
+};
 
-interface ProductItemRequest {
+type ProductItemRequest = {
   _id: string;
   quantity: number;
   productSizeId: string;
-}
+  productSize?: ProductVariants;
+};
 
 interface CartRequest {
   productItemId: string;

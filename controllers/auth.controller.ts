@@ -30,7 +30,7 @@ const loginController: RouteHandler<{ Body: LoginRequest }> = async (
   const accessToken = jwt.sign(
     { email: user.email, role: user.role, id: user._id },
     process.env.ACCESS_TOKEN!,
-    { expiresIn: "15m" }
+    { expiresIn: "8m" }
   );
 
   const refreshToken = jwt.sign(
@@ -121,7 +121,7 @@ const refreshController: RouteHandler = async (request, reply) => {
     { email: user.email, role: user.role, id: user._id },
 
     process.env.ACCESS_TOKEN!,
-    { expiresIn: "15m" }
+    { expiresIn: "8m" }
   );
 
   reply.send({ accessToken });

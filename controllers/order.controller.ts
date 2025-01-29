@@ -4,8 +4,6 @@ import ProductItem from "../models/product-item.model";
 import OrderDetails from "../models/order-details.model";
 import Address from "../models/address.model";
 import { ErrorResponse } from "../errors/ErrorResponse";
-import { populate } from "dotenv";
-import path from "path";
 
 const createOrder: RouteHandler<{ Body: OrderRequest }> = async (req, res) => {
   try {
@@ -38,6 +36,11 @@ const createOrder: RouteHandler<{ Body: OrderRequest }> = async (req, res) => {
       total,
       shippingFee,
       orderDetails: orderDetailsIds,
+      method: req.body.method,
+      ...(req.body.method !== "cash" && {
+        statusPay: "pending",
+        referenceId: req.body.referenceId,
+      }),
     });
     await newOrder.populate({
       path: "orderDetails",
@@ -275,6 +278,48 @@ const handleGetUsersOrders: RouteHandler = async (req, res) => {
   }
 };
 
+const handleGetByReferenceId: RouteHandler<{
+  Querystring: { referenceId: string };
+}> = async (req, res) => {
+  try {
+    const { referenceId } = req.query;
+
+    const order = await Order.findOne({ referenceId })
+      .populate({
+        path: "orderDetails",
+
+        populate: {
+          path: "productItem",
+          select: "quantity",
+          populate: [
+            {
+              path: "product",
+              select: "name price avatar",
+              populate: {
+                path: "productColor",
+                select: "value",
+              },
+            },
+            {
+              path: "productSize",
+              select: "value",
+            },
+          ],
+        },
+      })
+      .lean()
+      .exec();
+
+    if (!order) {
+      return ErrorResponse.sendError(res, "Order not found", 404);
+    }
+
+    return res.send(order);
+  } catch (error) {
+    throw new Error("Error while getting order by referenceId");
+  }
+};
+
 export default {
   createOrder,
   getOrderById,
@@ -282,4 +327,5 @@ export default {
   deleteOrder,
   handleGetUsersOrders,
   handleGetAllOrders,
+  handleGetByReferenceId,
 };

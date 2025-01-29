@@ -19,6 +19,7 @@ import shoppingCartRouter from "./routes/shopping-cart.route";
 import productRoutes from "./routes/product.route";
 import orderRoute from "./routes/order.route";
 import passwordRouter from "./routes/password.route";
+import paymentRouter from "./routes/payment.route";
 
 const fastify = Fastify();
 
@@ -29,6 +30,7 @@ dotenv.config();
 declare module "fastify" {
   interface FastifyRequest {
     user: UserJWTPayload | null;
+    rawBody: string;
   }
 }
 
@@ -86,6 +88,7 @@ fastify.register(shoppingCartRouter, { prefix: "/cart" });
 fastify.register(productRoutes, { prefix: "/product" });
 fastify.register(orderRoute, { prefix: "/order" });
 fastify.register(passwordRouter, { prefix: "/password" });
+fastify.register(paymentRouter, { prefix: "/payment" });
 
 fastify.addHook("onRequest", async (req) => {
   console.log(`Request received: ${req.method} ${req.url} `);
