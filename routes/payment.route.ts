@@ -30,6 +30,21 @@ const paymentRouter: FastifyPluginAsync = async (fastify) => {
       rawBody: true,
     },
   });
+
+  fastify.post("/repay", {
+    ...auth.requiredAuth(fastify),
+    handler: paymentController.handleRepay,
+    schema: {
+      body: {
+        type: "object",
+        properties: {
+          referenceId: { type: "string" },
+        },
+        required: ["referenceId"],
+      },
+      ...commonResponseSchema({ url: { type: "string", format: "uri" } }),
+    },
+  });
 };
 
 export default paymentRouter;

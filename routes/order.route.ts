@@ -26,7 +26,7 @@ const orderRoute: FastifyPluginAsync = async (fastify, opts) => {
     "/:id",
 
     {
-      ...auth.requiredRole(fastify, "ROLE_ADMIN"),
+      ...auth.requiredRole(fastify, "ROLE_ADMIN", "ROLE_USER"),
       handler: orderController.updateOrderStatus,
       schema: {
         body: {

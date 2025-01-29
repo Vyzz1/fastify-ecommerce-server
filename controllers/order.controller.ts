@@ -207,6 +207,7 @@ const handleGetAllOrders: RouteHandler = async (req, res) => {
           select: "email firstName lastName photoURL",
         },
       ])
+      .sort({ createdAt: -1 })
       .lean();
 
     return res.send(orders || []);

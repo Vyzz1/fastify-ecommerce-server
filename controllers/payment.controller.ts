@@ -4,6 +4,7 @@ import User from "../models/user.model";
 import Payment from "../models/payment.model";
 import { ErrorResponse } from "../errors/ErrorResponse";
 import Order from "../models/order.model";
+import mailer from "../utils/mailer";
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!);
 
@@ -16,8 +17,6 @@ const handleCreatePaymentIntent: RouteHandler<{
 }> = async (request, reply) => {
   try {
     const items = request.body;
-
-    console.log(request.user);
 
     const user = await User.findById(request.user?.id).exec();
 
@@ -80,8 +79,6 @@ const handleWebhook: RouteHandler = async (request, reply) => {
     const sig = request.headers["stripe-signature"] as string;
     const rawBody = request.rawBody;
 
-    console.log("rawBody", rawBody);
-
     const event = stripe.webhooks.constructEvent(
       rawBody!,
       sig,
@@ -91,7 +88,7 @@ const handleWebhook: RouteHandler = async (request, reply) => {
     if (event.type === "checkout.session.completed") {
       const session = event.data.object as Stripe.Checkout.Session;
 
-      const payment = await Payment.findOne({ sessionId: session.id });
+      const payment = await Payment.findOne({ sessionId: session.id }).exec();
 
       if (payment) {
         payment.status = "paid";
@@ -99,7 +96,9 @@ const handleWebhook: RouteHandler = async (request, reply) => {
       } else {
         console.error("Payment not found for session:", session.id);
       }
-      const order = await Order.findOne({ referenceId: payment.referenceId });
+      const order = await Order.findOne({ referenceId: payment.referenceId })
+        .populate("user")
+        .exec();
 
       if (order) {
         order.statusPay = "paid";
@@ -116,7 +115,57 @@ const handleWebhook: RouteHandler = async (request, reply) => {
   }
 };
 
+const handleRepay: RouteHandler<{ Body: { referenceId: string } }> = async (
+  req,
+  reply
+) => {
+  try {
+    const payment = await Payment.findOne({
+      referenceId: req.body.referenceId,
+    }).exec();
+
+    if (!payment) {
+      return ErrorResponse.sendError(reply, "Payment not found", 404);
+    }
+
+    const sessions = await stripe.checkout.sessions.create({
+      payment_method_types: ["card"],
+      line_items: payment.product.map((item: any) => ({
+        quantity: item.quantity,
+        price_data: {
+          currency: "usd",
+          product_data: {
+            name: item.name,
+            images: [item.avatar],
+            metadata: {
+              color: item.color,
+              size: item.size,
+              user: payment.user.toString(),
+              productName: item.name,
+              avatar: item.avatar,
+            },
+          },
+          unit_amount: item.price * 100,
+        },
+      })),
+      mode: "payment",
+      success_url: `${process.env.CLIENT_URL}/success?referenceId=${req.body.referenceId}`,
+      cancel_url: `${process.env.CLIENT_URL}/cancel?referenceId=${req.body.referenceId}`,
+    });
+
+    payment.status = "pending";
+    payment.sessionId = sessions.id;
+    await payment.save();
+
+    return reply.send({ url: sessions.url });
+  } catch (error) {
+    console.error(error);
+    throw new Error("An error occurred");
+  }
+};
+
 export default {
   handleCreatePaymentIntent,
   handleWebhook,
+  handleRepay,
 };

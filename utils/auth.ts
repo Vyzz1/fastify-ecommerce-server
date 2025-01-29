@@ -9,7 +9,7 @@ const requiredRole = (fastify: FastifyInstance, ...role: string[]) => ({
 });
 
 const requiredAuth = (fastify: FastifyInstance) => ({
-  onRequest: fastify.auth([validateJwt]),
+  onRequest: fastify.auth([validateJwt], { relation: "and" }),
 });
 
 const authRequiredHook = async (fastify: FastifyInstance) => {
