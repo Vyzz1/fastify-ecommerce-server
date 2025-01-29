@@ -2,6 +2,7 @@ import { FastifyPluginAsync, RouteHandler } from "fastify";
 import auth from "../utils/auth";
 import paymentController from "../controllers/payment.controller";
 import { commonResponseSchema } from "../schemas";
+import rawBody from "fastify-raw-body";
 
 const paymentRouter: FastifyPluginAsync = async (fastify) => {
   fastify.post("/", {
@@ -24,8 +25,17 @@ const paymentRouter: FastifyPluginAsync = async (fastify) => {
     },
   });
 
+  fastify.register(rawBody, {
+    global: false,
+    field: "rawBody",
+    encoding: "utf8",
+  });
+
   fastify.post("/webhook", {
     handler: paymentController.handleWebhook,
+    config: {
+      rawBody: true,
+    },
   });
 };
 
