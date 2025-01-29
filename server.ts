@@ -20,6 +20,7 @@ import productRoutes from "./routes/product.route";
 import orderRoute from "./routes/order.route";
 import passwordRouter from "./routes/password.route";
 import paymentRouter from "./routes/payment.route";
+import rawBody from "fastify-raw-body";
 
 const fastify = Fastify();
 
@@ -30,12 +31,15 @@ dotenv.config();
 declare module "fastify" {
   interface FastifyRequest {
     user: UserJWTPayload | null;
-    rawBody: string;
   }
 }
 
 fastify.decorateRequest("user", null);
 
+fastify.register(rawBody, {
+  global: false,
+  runFirst: true,
+});
 // middlewares
 fastify.register(cookie, {
   secret: "mysecret",
