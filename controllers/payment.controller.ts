@@ -81,7 +81,7 @@ const handleWebhook: RouteHandler = async (request, reply) => {
     const rawBody = request.rawBody;
 
     const event = stripe.webhooks.constructEvent(
-      rawBody,
+      Buffer.from(JSON.stringify(rawBody)).toString(),
       sig,
       process.env.STRIPE_WEBHOOK_SECRET!
     );
