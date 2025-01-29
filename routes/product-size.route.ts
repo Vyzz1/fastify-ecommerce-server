@@ -6,6 +6,7 @@ import {
   productVariantSchema,
 } from "../schemas";
 import ProductSize from "../models/product-size.model";
+import auth from "../utils/auth";
 
 const ProductSizeRouter: FastifyPluginAsync = async (fastify) => {
   const controller = new ProductVariantController(ProductSize);
@@ -34,6 +35,8 @@ const ProductSizeRouter: FastifyPluginAsync = async (fastify) => {
   });
 
   fastify.post<{ Body: ProductVariants }>("/", {
+    ...auth.requiredRole(fastify, "ROLE_ADMIN"),
+
     handler: controller.handleCreate,
     schema: {
       body: {
@@ -47,6 +50,8 @@ const ProductSizeRouter: FastifyPluginAsync = async (fastify) => {
   });
 
   fastify.put<{ Params: { id: string }; Body: ProductVariants }>("/:id", {
+    ...auth.requiredRole(fastify, "ROLE_ADMIN"),
+
     handler: controller.handleUpdate,
     schema: {
       params: {
@@ -67,6 +72,8 @@ const ProductSizeRouter: FastifyPluginAsync = async (fastify) => {
 
   fastify.delete<{ Params: { id: string } }>("/:id", {
     handler: controller.handleDelete,
+    ...auth.requiredRole(fastify, "ROLE_ADMIN"),
+
     schema: {
       params: {
         type: "object",

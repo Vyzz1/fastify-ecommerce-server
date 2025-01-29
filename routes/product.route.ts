@@ -11,6 +11,8 @@ const productRoutes: FastifyPluginAsync = async (fastify) => {
   // fastify.get("/",)
 
   fastify.post<{ Body: ProductRequest }>("/", {
+    ...auth.requiredRole(fastify, "ROLE_ADMIN"),
+
     handler: productController.handleCreateProduct,
     schema: {
       body: {
@@ -31,6 +33,8 @@ const productRoutes: FastifyPluginAsync = async (fastify) => {
   });
 
   fastify.put<{ Params: { id: string }; Body: ProductRequest }>("/:id", {
+    ...auth.requiredRole(fastify, "ROLE_ADMIN"),
+
     handler: productController.handleUpdateProduct,
     schema: {
       ...requiredIdParam,
@@ -50,6 +54,8 @@ const productRoutes: FastifyPluginAsync = async (fastify) => {
   });
 
   fastify.delete<{ Params: { id: string } }>("/:id", {
+    ...auth.requiredRole(fastify, "ROLE_ADMIN"),
+
     handler: productController.handleDeteleProduct,
     schema: {
       ...requiredIdParam,
@@ -58,6 +64,8 @@ const productRoutes: FastifyPluginAsync = async (fastify) => {
   });
 
   fastify.put("/show/:id", {
+    ...auth.requiredRole(fastify, "ROLE_ADMIN"),
+
     handler: productController.handleUpdtateShowOnHomepage,
     schema: {
       ...requiredIdParam,

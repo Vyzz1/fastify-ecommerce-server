@@ -7,6 +7,7 @@ import {
 } from "../schemas";
 import ProductParentsController from "../controllers/product-parent.controller";
 import Category from "../models/category.model";
+import auth from "../utils/auth";
 // import auth from "../utils/auth";
 
 const categoryRoute: FastifyPluginAsync = async (fastify) => {
@@ -33,6 +34,7 @@ const categoryRoute: FastifyPluginAsync = async (fastify) => {
   fastify.post<{ Body: ProductParents }>(
     "/",
     {
+      ...auth.requiredRole(fastify, "ROLE_ADMIN"),
       // ...auth.requiredRole(fastify, "admin"),
       schema: {
         body: {
@@ -51,14 +53,11 @@ const categoryRoute: FastifyPluginAsync = async (fastify) => {
     controller.handleCreate
   );
 
-  const a = {
-    ...commonResponseSchema(categorySchema),
-  };
-  console.log(a);
   fastify.put<{ Params: { id: string }; Body: ProductParents }>(
     "/:id",
     {
       // ...auth.requiredRole(fastify, "admin"),
+      ...auth.requiredRole(fastify, "ROLE_ADMIN"),
 
       schema: {
         ...requiredIdParam,
@@ -81,6 +80,8 @@ const categoryRoute: FastifyPluginAsync = async (fastify) => {
     "/:id",
     {
       // ...auth.requiredRole(fastify, "admin"),
+      ...auth.requiredRole(fastify, "ROLE_ADMIN"),
+
       schema: {
         params: {
           type: "object",

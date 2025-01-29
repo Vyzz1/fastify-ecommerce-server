@@ -6,6 +6,7 @@ import {
   errorResponse,
   productVariantSchema,
 } from "../schemas";
+import auth from "../utils/auth";
 
 const ProductColorRouter: FastifyPluginAsync = async (fastify) => {
   const controller = new ProductVariantController(ProductColor);
@@ -36,6 +37,8 @@ const ProductColorRouter: FastifyPluginAsync = async (fastify) => {
   fastify.post<{ Body: ProductVariants }>("/", {
     handler: controller.handleCreate,
     schema: {
+      ...auth.requiredRole(fastify, "ROLE_ADMIN"),
+
       body: {
         required: ["value"],
         type: "object",
@@ -48,6 +51,8 @@ const ProductColorRouter: FastifyPluginAsync = async (fastify) => {
 
   fastify.put<{ Params: { id: string }; Body: ProductVariants }>("/:id", {
     handler: controller.handleUpdate,
+    ...auth.requiredRole(fastify, "ROLE_ADMIN"),
+
     schema: {
       params: {
         type: "object",
@@ -67,6 +72,8 @@ const ProductColorRouter: FastifyPluginAsync = async (fastify) => {
 
   fastify.delete<{ Params: { id: string } }>("/:id", {
     handler: controller.handleDelete,
+    ...auth.requiredRole(fastify, "ROLE_ADMIN"),
+
     schema: {
       params: {
         type: "object",

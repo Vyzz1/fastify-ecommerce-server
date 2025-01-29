@@ -2,7 +2,7 @@ import { FastifyPluginAsync } from "fastify";
 import { brandSchema } from "../schemas";
 import ProductParentsController from "../controllers/product-parent.controller";
 import Brand from "../models/brand.model";
-
+import auth from "../utils/auth";
 const brandRouter: FastifyPluginAsync = async (fastify) => {
   // GET /brands - Get all brands
 
@@ -33,6 +33,7 @@ const brandRouter: FastifyPluginAsync = async (fastify) => {
   fastify.post<{ Body: ProductParents }>(
     "/",
     {
+      ...auth.requiredRole(fastify, "ROLE_ADMIN"),
       schema: {
         body: {
           type: "object",
@@ -60,6 +61,7 @@ const brandRouter: FastifyPluginAsync = async (fastify) => {
   }>(
     "/:id",
     {
+      ...auth.requiredRole(fastify, "ROLE_ADMIN"),
       schema: {
         params: {
           type: "object",
@@ -91,6 +93,7 @@ const brandRouter: FastifyPluginAsync = async (fastify) => {
   fastify.delete<{ Params: { id: string } }>(
     "/:id",
     {
+      ...auth.requiredRole(fastify, "ROLE_ADMIN"),
       schema: {
         params: {
           type: "object",
