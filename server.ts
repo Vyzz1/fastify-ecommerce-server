@@ -39,6 +39,9 @@ fastify.decorateRequest("user", null);
 fastify.register(rawBody, {
   global: false,
   runFirst: true,
+  routes: [],
+  encoding: "utf8",
+  field: "rawBody",
 });
 // middlewares
 fastify.register(cookie, {

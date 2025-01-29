@@ -80,6 +80,8 @@ const handleWebhook: RouteHandler = async (request, reply) => {
     const sig = request.headers["stripe-signature"] as string;
     const rawBody = request.rawBody;
 
+    console.log("rawBody", rawBody);
+
     const event = stripe.webhooks.constructEvent(
       Buffer.from(JSON.stringify(rawBody)).toString(),
       sig,
