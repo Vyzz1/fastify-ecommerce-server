@@ -4,6 +4,7 @@ import ProductItem from "../models/product-item.model";
 import OrderDetails from "../models/order-details.model";
 import Address from "../models/address.model";
 import { ErrorResponse } from "../errors/ErrorResponse";
+import ShoppingCartItem from "../models/shopping-cart-item.model";
 
 const createOrder: RouteHandler<{ Body: OrderRequest }> = async (req, res) => {
   try {
@@ -92,6 +93,8 @@ async function createOrderDetails(
     }
 
     await productItem.save();
+
+    await ShoppingCartItem.findOneAndDelete({ productItem: productItemId });
 
     const newOrderDetail = await OrderDetails.create({
       productItem: productItemId,

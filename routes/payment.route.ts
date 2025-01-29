@@ -23,6 +23,10 @@ const paymentRouter: FastifyPluginAsync = async (fastify) => {
       ...commonResponseSchema({ url: { type: "string", format: "uri" } }),
     },
   });
+
+  fastify.post("/webhook", {
+    handler: paymentController.handleWebhook,
+  });
 };
 
 export default paymentRouter;
