@@ -130,7 +130,13 @@ const productRoutes: FastifyPluginAsync = async (fastify) => {
         },
         required: ["name"],
       },
-      ...commonResponseSchema(productSchema),
+      ...commonResponseSchema(
+        {
+          items: { type: "object", properties: productSchema },
+        },
+        200,
+        "array"
+      ),
     },
   });
 
