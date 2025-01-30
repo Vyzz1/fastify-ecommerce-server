@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Spring Commerce Backend</title>
+    <style>
+      :root {
+        --primary-color: #6db33f;
+        --secondary-color: #1b1f23;
+        --text-color: #e0e0e0;
+        --bg-color: #0d1117;
+      }
+      body {
+        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+        background-color: var(--bg-color);
+        color: var(--text-color);
+        margin: 0;
+        padding: 0;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        min-height: 100vh;
+        line-height: 1.6;
+      }
+      .container {
+        background-color: var(--secondary-color);
+        padding: 2rem;
+        border-radius: 10px;
+        box-shadow: 0 0 20px rgba(109, 179, 63, 0.1);
+        max-width: 600px;
+        width: 100%;
+      }
+      h1 {
+        color: var(--primary-color);
+        margin-bottom: 1rem;
+        font-size: 2.5rem;
+        text-align: center;
+        animation: fadeInDown 1s ease-out;
+      }
+      .status-container {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 1rem;
+        animation: fadeInUp 1s ease-out 0.5s both;
+      }
+      .status-item {
+        text-align: center;
+        flex: 1;
+      }
+      .status-label {
+        font-size: 0.9rem;
+        color: #9e9e9e;
+      }
+      .status-value {
+        font-size: 1.2rem;
+        font-weight: bold;
+        color: var(--primary-color);
+      }
+      .github-link {
+        display: inline-block;
+        margin-top: 1rem;
+        padding: 0.5rem 1rem;
+        background-color: var(--primary-color);
+        color: var(--secondary-color);
+        text-decoration: none;
+        border-radius: 5px;
+        font-weight: bold;
+        transition: all 0.3s ease;
+        animation: pulse 2s infinite;
+      }
+      .github-link:hover {
+        background-color: #5a9334;
+        transform: translateY(-2px);
+      }
+      .author {
+        font-style: italic;
+        color: #9e9e9e;
+        margin-top: 2rem;
+        text-align: center;
+        font-size: 0.9rem;
+      }
+      @keyframes fadeInDown {
+        from {
+          opacity: 0;
+          transform: translateY(-20px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+      @keyframes fadeInUp {
+        from {
+          opacity: 0;
+          transform: translateY(20px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+      @keyframes pulse {
+        0% {
+          box-shadow: 0 0 0 0 rgba(109, 179, 63, 0.4);
+        }
+        70% {
+          box-shadow: 0 0 0 10px rgba(109, 179, 63, 0);
+        }
+        100% {
+          box-shadow: 0 0 0 0 rgba(109, 179, 63, 0);
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <h1>Spring Commerce Backend</h1>
+      <div class="status-container">
+        <div class="status-item">
+          <div class="status-label">Status</div>
+          <div class="status-value">Running</div>
+        </div>
+        <div class="status-item">
+          <div class="status-label">Version</div>
+          <div class="status-value">1.2.0</div>
+        </div>
+        <div class="status-item">
+          <div class="status-label">Uptime</div>
+          <div class="status-value">99.9%</div>
+        </div>
+      </div>
+      <p>
+        This is the server for the Spring Commerce website. It provides robust
+        e-commerce functionality with high performance and scalability.
+      </p>
+      <a
+        href="https://github.com/Vyzz1/fastify-ecommerce-server"
+        target="_blank"
+        rel="noopener noreferrer"
+        class="github-link"
+        >View on GitHub</a
+      >
+      <p class="author">Created by VyHuynh</p>
+    </div>
+  </body>
+</html>

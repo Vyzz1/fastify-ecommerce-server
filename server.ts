@@ -21,7 +21,8 @@ import orderRoute from "./routes/order.route";
 import passwordRouter from "./routes/password.route";
 import paymentRouter from "./routes/payment.route";
 import rawBody from "fastify-raw-body";
-
+import statisFiles from "@fastify/static";
+import path from "node:path";
 const fastify = Fastify();
 
 const PORT = 8000;
@@ -61,6 +62,10 @@ fastify.addContentTypeParser("multipart/form-data", (_, payload, done) => {
   done(null, payload);
 });
 
+fastify.register(statisFiles, {
+  root: path.join(__dirname, "public"),
+});
+
 // global schemas
 fastify.addSchema({
   $id: "ErrorResponse",
@@ -97,6 +102,9 @@ fastify.register(orderRoute, { prefix: "/order" });
 fastify.register(passwordRouter, { prefix: "/password" });
 fastify.register(paymentRouter, { prefix: "/payment" });
 
+fastify.get("/", function (_, reply) {
+  reply.sendFile("index.html");
+});
 fastify.addHook("onRequest", async (req) => {
   console.log(`Request received: ${req.method} ${req.url} ${req.hostname} `);
 });
