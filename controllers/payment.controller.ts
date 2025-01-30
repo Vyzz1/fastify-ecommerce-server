@@ -164,8 +164,43 @@ const handleRepay: RouteHandler<{ Body: { referenceId: string } }> = async (
   }
 };
 
+const handleGetAllPayments: RouteHandler = async (req, res) => {
+  try {
+    console.log(req.user);
+
+    const payments = await Payment.find()
+      .populate("user")
+
+      .sort({ createdAt: -1 })
+      .lean()
+      .exec();
+
+    return res.send(payments || []);
+  } catch (error) {
+    console.error(error);
+    throw new Error("An error occurred");
+  }
+};
+
+const handleGetUserPayments: RouteHandler = async (req, res) => {
+  try {
+    const payments = await Payment.find({ user: req.user?.id })
+      .sort({ createdAt: -1 })
+      .lean()
+      .exec();
+
+    return res.send(payments || []);
+  } catch (error) {
+    console.error(error);
+
+    throw new Error("An error occurred");
+  }
+};
+
 export default {
   handleCreatePaymentIntent,
   handleWebhook,
+  handleGetAllPayments,
   handleRepay,
+  handleGetUserPayments,
 };

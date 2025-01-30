@@ -98,9 +98,7 @@ fastify.register(passwordRouter, { prefix: "/password" });
 fastify.register(paymentRouter, { prefix: "/payment" });
 
 fastify.addHook("onRequest", async (req) => {
-  console.log(`Request received: ${req.method} ${req.url} `);
-
-  console.log("Cookies", req.cookies.refreshToken);
+  console.log(`Request received: ${req.method} ${req.url} ${req.hostname} `);
 });
 
 // start the server

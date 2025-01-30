@@ -45,6 +45,16 @@ const paymentRouter: FastifyPluginAsync = async (fastify) => {
       ...commonResponseSchema({ url: { type: "string", format: "uri" } }),
     },
   });
+
+  fastify.get("/", {
+    ...auth.requiredRole(fastify, "ROLE_ADMIN"),
+    handler: paymentController.handleGetAllPayments,
+  });
+
+  fastify.get("/user", {
+    ...auth.requiredAuth(fastify),
+    handler: paymentController.handleGetUserPayments,
+  });
 };
 
 export default paymentRouter;

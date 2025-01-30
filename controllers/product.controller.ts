@@ -108,10 +108,8 @@ const handleUpdateProduct: RouteHandler<{
     product.avatar = avatar || product.avatar;
     product.images = images || product.images;
 
-    // Save updated product
     await product.save();
 
-    // Populate the necessary fields for consistent response
     const updatedProduct = await product.populate([
       { path: "brand", select: "-__v" },
       { path: "category", select: "-__v" },
@@ -127,7 +125,6 @@ const handleUpdateProduct: RouteHandler<{
       },
     ]);
 
-    // Return the response in the desired format
     return reply.send({
       ...updatedProduct.toJSON(),
       colorName: (updatedProduct.productColor as any).value,
@@ -309,7 +306,7 @@ const handleUpdtateShowOnHomepage: RouteHandler<{
       return ErrorResponse.sendError(res, "Product not found", 404);
     }
 
-    return res.send(product);
+    return res.send({ message: "Updated successfully" });
   } catch (error) {
     console.log(error);
     throw new Error("An error occurred");

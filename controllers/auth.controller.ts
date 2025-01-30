@@ -266,7 +266,8 @@ const handleGetAllUser: RouteHandler = async (req, res) => {
       role: {
         $ne: "ROLE_ADMIN",
       },
-    }).exec();
+    })
+    .exec();
 
     return res.send(users);
   } catch (error) {

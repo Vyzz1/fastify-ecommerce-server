@@ -3,6 +3,8 @@ import productController from "../controllers/product.controller";
 import {
   commonResponseSchema,
   errorResponse,
+  filteredProductSchema,
+  productSchema,
   requiredIdParam,
 } from "../schemas";
 import auth from "../utils/auth";
@@ -38,19 +40,30 @@ const productRoutes: FastifyPluginAsync = async (fastify) => {
     handler: productController.handleUpdateProduct,
     schema: {
       ...requiredIdParam,
-      response: {
-        ...errorResponse,
-      },
+      ...commonResponseSchema(productSchema),
     },
   });
 
   fastify.get<{ Params: { id: string } }>("/:id", {
     handler: productController.handleGetProduct,
+    schema: {
+      ...requiredIdParam,
+      ...commonResponseSchema(productSchema),
+    },
   });
 
   fastify.get("/", {
-    handler: productController.handleGetAllProducts,
     ...auth.requiredRole(fastify, "ROLE_ADMIN"),
+    handler: productController.handleGetAllProducts,
+    schema: {
+      ...commonResponseSchema(
+        {
+          items: { type: "object", properties: productSchema },
+        },
+        200,
+        "array"
+      ),
+    },
   });
 
   fastify.delete<{ Params: { id: string } }>("/:id", {
@@ -76,9 +89,7 @@ const productRoutes: FastifyPluginAsync = async (fastify) => {
         },
         required: ["showHomepage"],
       },
-      response: {
-        ...errorResponse,
-      },
+      ...commonResponseSchema({ message: { type: "string" } }),
     },
   });
 
@@ -86,13 +97,28 @@ const productRoutes: FastifyPluginAsync = async (fastify) => {
     handler: productController.handleGetRelatedProducts,
     schema: {
       ...requiredIdParam,
-      response: {
-        ...errorResponse,
-      },
+      ...commonResponseSchema(
+        {
+          items: { type: "object", properties: productSchema },
+        },
+        200,
+        "array"
+      ),
     },
   });
 
-  fastify.get("/show-on-homepage", productController.handleGetShowOnHomepage);
+  fastify.get("/show-on-homepage", {
+    handler: productController.handleGetShowOnHomepage,
+    schema: {
+      ...commonResponseSchema(
+        {
+          items: { type: "object", properties: productSchema },
+        },
+        200,
+        "array"
+      ),
+    },
+  });
 
   fastify.get("/search", {
     handler: productController.handleSearchAutoComplete,
@@ -104,9 +130,7 @@ const productRoutes: FastifyPluginAsync = async (fastify) => {
         },
         required: ["name"],
       },
-      response: {
-        ...errorResponse,
-      },
+      ...commonResponseSchema(productSchema),
     },
   });
 
@@ -118,6 +142,8 @@ const productRoutes: FastifyPluginAsync = async (fastify) => {
 
         required: ["page"],
       },
+
+      ...commonResponseSchema(filteredProductSchema),
     },
   });
 };

@@ -36,9 +36,8 @@ const ProductColorRouter: FastifyPluginAsync = async (fastify) => {
 
   fastify.post<{ Body: ProductVariants }>("/", {
     handler: controller.handleCreate,
+    ...auth.requiredRole(fastify, "ROLE_ADMIN"),
     schema: {
-      ...auth.requiredRole(fastify, "ROLE_ADMIN"),
-
       body: {
         required: ["value"],
         type: "object",

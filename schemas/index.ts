@@ -94,6 +94,103 @@ export const productItemSchema = {
   },
 };
 
+const smaillProductItemSchema = {
+  _id: { type: "string" },
+  quantity: { type: "number" },
+  productSize: {
+    type: "object",
+    properties: productVariantSchema,
+  },
+};
+export const productSchema = {
+  _id: { type: "string" },
+  name: { type: "string" },
+  price: { type: "number" },
+  avatar: { type: "string" },
+  description: { type: "string" },
+  createdAt: { type: "string", format: "date-time" },
+  showHomepage: { type: "boolean" },
+  images: {
+    type: "array",
+    items: {
+      type: "string",
+    },
+  },
+  sizes: {
+    type: "array",
+    items: {
+      type: "string",
+    },
+  },
+  productColor: {
+    type: "object",
+    properties: productVariantSchema,
+  },
+  productItems: {
+    type: "array",
+    items: {
+      type: "object",
+      properties: smaillProductItemSchema,
+    },
+  },
+  category: {
+    type: "object",
+    properties: categorySchema,
+  },
+  brand: {
+    type: "object",
+    properties: brandSchema,
+  },
+  colorName: {
+    type: "string",
+  },
+  categoryId: {
+    type: "string",
+  },
+  brandId: {
+    type: "string",
+  },
+  productColorId: {
+    type: "string",
+  },
+};
+
+export const filteredProductSchema = {
+  content: {
+    type: "array",
+    items: {
+      type: "object",
+      properties: productSchema,
+    },
+  },
+  total: {
+    type: "number",
+  },
+  page: {
+    type: "number",
+  },
+  limit: {
+    type: "number",
+  },
+  totalPages: {
+    type: "number",
+  },
+  last: {
+    type: "boolean",
+  },
+  next: {
+    type: "boolean",
+  },
+  pageable: {
+    type: "object",
+    properties: {
+      pageNumber: {
+        type: "number",
+      },
+    },
+  },
+};
+
 export const orderDetailSchema = {
   _id: { type: "string" },
   quantity: { type: "number" },
